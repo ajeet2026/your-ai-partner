@@ -201,10 +201,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     function checkAuthStatus() {
         if (!Store.token && !Store.isGuest) {
-            DOMElements.authModalOverlay.style.display = "flex";
-            DOMElements.authModalOverlay.style.zIndex = "99999";
+            DOMElements.authModalOverlay.classList.add("active");
         } else {
-            DOMElements.authModalOverlay.style.display = "none";
+            DOMElements.authModalOverlay.classList.remove("active");
         }
     }
 
@@ -238,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         DOMElements.btnContinueAsGuest.addEventListener("click", (e) => {
             e.preventDefault();
             Store.setGuestMode(true);
-            DOMElements.authModalOverlay.style.display = "none";
+            DOMElements.authModalOverlay.classList.remove("active");
             
             // Re-evaluate onboarding/dashboard visual state
             if (Store.state.onboarded) {
@@ -252,8 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Open Auth modal
         DOMElements.btnOpenAuthModal.addEventListener("click", () => {
-            DOMElements.authModalOverlay.style.display = "flex";
-            DOMElements.authModalOverlay.style.zIndex = "99999";
+            DOMElements.authModalOverlay.classList.add("active");
         });
         
         // Sign Out
@@ -261,8 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (confirm("Are you sure you want to sign out? Your local guest profile will be cleared if you log out of Guest Mode, but your database cloud profile is perfectly secure.")) {
                 Store.signOutUser();
                 DOMElements.onboardingOverlay.style.display = "flex";
-                DOMElements.authModalOverlay.style.display = "flex";
-                DOMElements.authModalOverlay.style.zIndex = "99999";
+                DOMElements.authModalOverlay.classList.add("active");
             }
         });
         
@@ -286,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 if (result.success) {
-                    DOMElements.authModalOverlay.style.display = "none";
+                    DOMElements.authModalOverlay.classList.remove("active");
                     DOMElements.authEmailInput.value = "";
                     DOMElements.authPasswordInput.value = "";
                     DOMElements.authNameInput.value = "";
