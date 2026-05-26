@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI Partner — Personalized Learning & Success Companion</title>
+    
+    <!-- SEO Optimization -->
+    <meta name="description" content="Build academic consistency, clear doubts step-by-step, manage exam stress, and design custom study schedules with your personalized AI Companion.">
+    <meta name="keywords" content="AI partner, personalized learning, study planner, doubt solver, JEE prep, NEET prep, exam coach, mental wellness, UPSC">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Core Stylesheet -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Chart.js via CDN for beautiful charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Stripe.js for Production Payments -->
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+    <!-- ======================================================== -->
+    <!-- 1. ONBOARDING OVERLAY CONTAINER -->
+    <!-- ======================================================== -->
+    <div id="onboardingOverlay" class="onboarding-backdrop">
+        <div class="onboarding-card glass-panel text-center">
+            
+            <!-- Dynamic Steps Indicator -->
+            <div class="onboarding-steps">
+                <div class="onboarding-progress-line" id="onboardProgress"></div>
+                <div class="onboarding-step-indicator active" data-step="1">1</div>
+                <div class="onboarding-step-indicator" data-step="2">2</div>
+                <div class="onboarding-step-indicator" data-step="3">3</div>
+            </div>
+
+            <!-- Onboarding Step 1: Student Metadata Profile -->
+            <div id="onboardStep1" class="onboarding-form-section active">
+                <h2 style="margin-bottom: 8px;">Let's Set Up Your Profile</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Tell us about yourself so your AI partner can adjust to your needs.</p>
+                
+                <form id="profileForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="input-group">
+                            <label class="input-label">Full Name</label>
+                            <input type="text" id="profName" class="input-field" placeholder="Enter name" required>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Age</label>
+                            <input type="number" id="profAge" class="input-field" placeholder="Age" required>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="input-group">
+                            <label class="input-label">Category Track</label>
+                            <select id="profClass" class="input-field" required>
+                                <option value="School Class 6-10">School Class 6-10</option>
+                                <option value="School Class 11-12">School Class 11-12</option>
+                                <option value="JEE / NEET Aspirant">JEE / NEET Aspirant</option>
+                                <option value="Government Exam Aspirant">Govt Exam Aspirant (UPSC/SSC)</option>
+                                <option value="College Student">College Student (Engineering/Arts)</option>
+                                <option value="Custom">+ Add Custom Exam Type...</option>
+                            </select>
+                            <input type="text" id="profClassCustomInput" class="input-field" placeholder="Enter Custom Exam Type (e.g. CA / CAT)" style="display: none; margin-top: 10px;">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Target Exam</label>
+                            <input type="text" id="profExam" class="input-field" placeholder="e.g. JEE, UPSC, Board, CSE" required>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Select Weak Subjects (Hold Ctrl/Cmd to select multiple)</label>
+                        <select id="profWeak" class="input-field" style="height: 90px;" multiple required>
+                            <option value="Physics">Physics / Science</option>
+                            <option value="Math">Mathematics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="English">English / Literature</option>
+                            <option value="General Aptitude">General Aptitude / Aptitude</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="input-group">
+                            <label class="input-label">Study Hours Per Day</label>
+                            <input type="number" id="profHours" class="input-field" min="1" max="16" value="4" required>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Language Mode</label>
+                            <select id="profLang" class="input-field" required>
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi / हिंदी</option>
+                                <option value="Bengali">Bengali / বাংলা</option>
+                                <option value="Spanish">Spanish / Español</option>
+                                <option value="French">French / Français</option>
+                                <option value="German">German / Deutsch</option>
+                                <option value="Japanese">Japanese / 日本語</option>
+                                <option value="Mandarin">Mandarin / 中文</option>
+                                <option value="Russian">Russian / Русский</option>
+                                <option value="Arabic">Arabic / العربية</option>
+                                <option value="Portuguese">Portuguese / Português</option>
+                                <option value="Korean">Korean / 한국어</option>
+                                <option value="Italian">Italian / Italiano</option>
+                                <option value="Tamil">Tamil / தமிழ்</option>
+                                <option value="Telugu">Telugu / తెలుగు</option>
+                                <option value="Marathi">Marathi / मराठी</option>
+                                <option value="Gujarati">Gujarati / ગુજરાતી</option>
+                                <option value="Kannada">Kannada / ಕನ್ನಡ</option>
+                                <option value="Malayalam">Malayalam / മലയാളം</option>
+                                <option value="Punjabi">Punjabi / ਪੰਜਾਬੀ</option>
+                                <option value="Urdu">Urdu / اُردُو</option>
+                                <option value="Sanskrit">Sanskrit / संस्कृत</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                        Proceed to Diagnostic Quiz <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Onboarding Step 2: Diagnostic Assessment -->
+            <div id="onboardStep2" class="onboarding-form-section">
+                <h2 style="margin-bottom: 8px;">Quick Diagnostic Assessment</h2>
+                <p style="color: var(--text-muted); margin-bottom: 25px;">Let's test your baseline. Answer these 4 simple conceptual questions.</p>
+                
+                <div class="diagnostic-container" id="diagQuizContainer">
+                    <!-- Loaded dynamically via js -->
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button class="btn btn-outline" id="btnBackToStep1" style="flex: 1;">Back</button>
+                    <button class="btn btn-primary" id="btnSubmitOnboardQuiz" style="flex: 2;">
+                        Analyze & Complete <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Onboarding Step 3: Skill Graph & AI Summary -->
+            <div id="onboardStep3" class="onboarding-form-section">
+                <h2 style="margin-bottom: 8px; color: var(--color-success);">Assessment Complete!</h2>
+                <p style="color: var(--text-muted); margin-bottom: 25px;">Your AI partner has analyzed your response. Here is your baseline profile:</p>
+                
+                <div class="planner-grid" style="margin-bottom: 25px;">
+                    <!-- Skill Graph Canvas -->
+                    <div class="skill-graph-box">
+                        <canvas id="skillGraphCanvas" width="220" height="220"></canvas>
+                    </div>
+                    
+                    <!-- Text Evaluation Panel -->
+                    <div style="text-align: left; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+                        <div>
+                            <span class="badge badge-cyan" id="diagScoreBadge">Score: 75%</span>
+                            <span class="badge badge-purple" id="diagStyleBadge">Conceptual Style</span>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 14px;">🎯 Starting Focus Score</div>
+                            <div style="font-size: 20px; font-weight: 800; color: var(--color-primary);" id="diagFocusScore">85/100</div>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted);" id="diagSummaryText">
+                            Your conceptual understanding of Mathematics is strong, but we detected moderate room for improvement in Physics. A custom daily revision roadmap has been loaded into your planner.
+                        </p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" id="btnFinishOnboarding" style="width: 100%;">
+                    Enter My Success Dashboard <i class="fa-solid fa-rocket"></i>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 2. MAIN APPLICATION WORKSPACE -->
+    <!-- ======================================================== -->
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="brand-name">AI Partner</div>
+            </div>
+            
+            <!-- Ollama & SQLite Status Widget -->
+            <div class="server-status-widget glass-panel" style="margin: 0 15px 15px 15px; padding: 10px; border-radius: 12px; font-size: 11px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">AI Server</span>
+                    <span class="badge" id="ollamaStatusBadge" style="background: rgba(244, 63, 94, 0.15); color: var(--color-danger); border: 1px solid var(--color-danger); padding: 2px 6px; font-size: 9px; display: inline-flex; align-items: center; gap: 4px;">
+                        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger);" id="ollamaStatusDot"></span> Offline
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-color); font-weight: 500;" id="ollamaModelName">Simulated</span>
+                    <button class="btn btn-outline" id="btnOpenServerSettings" style="padding: 2px 6px; font-size: 10px; height: auto;" title="AI Settings">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; color: var(--text-muted);">
+                    <span>Database Sync</span>
+                    <span id="dbSyncText" style="color: var(--text-color); font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="color: var(--color-primary);"></i> Offline
+                    </span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-view="overview">
+                    <i class="fa-solid fa-chart-pie"></i> Overview
+                </div>
+                <div class="nav-item" data-view="planner">
+                    <i class="fa-solid fa-calendar-days"></i> AI Study Planner
+                </div>
+                <div class="nav-item" data-view="tutor">
+                    <i class="fa-solid fa-graduation-cap"></i> AI Learning Tutor
+                </div>
+                <div class="nav-item" data-view="mocktest">
+                    <i class="fa-solid fa-circle-check"></i> Mock Test Center
+                </div>
+                <div class="nav-item" data-view="wellness">
+                    <i class="fa-solid fa-heart-pulse"></i> Mental Wellness
+                </div>
+                <div class="nav-item" data-view="careers">
+                    <i class="fa-solid fa-compass"></i> Billing & Careers
+                </div>
+            </nav>
+            
+            <!-- Sidebar User Profile Info Footer -->
+            <div class="sidebar-user">
+                <div class="user-avatar" id="sidebarAvatar">A</div>
+                <div class="user-info" style="flex-grow: 1;">
+                    <div class="user-name" id="sidebarName">Student Name</div>
+                    <div class="user-level" id="sidebarLevel" style="margin-bottom: 2px;">Level 1 Novice</div>
+                    <div id="sidebarEmail" style="font-size: 9px; color: var(--text-muted); display: none;">guest@guest.com</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <button class="btn btn-outline" id="btnOpenAuthModal" style="padding: 2px 6px; font-size: 9px; height: auto;" title="Sign In">
+                        <i class="fa-solid fa-user-lock"></i> Login
+                    </button>
+                    <button class="btn btn-outline" id="btnSignOut" style="padding: 2px 6px; font-size: 9px; height: auto; border-color: rgba(244,63,94,0.3); color: var(--color-danger); display: none;" title="Sign Out">
+                        <i class="fa-solid fa-power-off"></i> Out
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Viewport Context -->
+        <main class="main-viewport">
+            
+            <!-- ========================================== -->
+            <!-- VIEW A: OVERVIEW / STATS DASHBOARD -->
+            <!-- ========================================== -->
+            <section id="view-overview" class="view-section active">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title" id="welcomeUserTitle">Welcome back, Student!</h1>
+                        <p class="page-subtitle">Here is your daily learning efficiency summary.</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" id="btnQuickTestQuickstart">
+                            <i class="fa-solid fa-circle-play"></i> Quick Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Highlighting Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel primary">
+                        <i class="fa-solid fa-fire stat-icon"></i>
+                        <span class="stat-label">Daily Streak</span>
+                        <div class="stat-value" id="statStreak">1 Day</div>
+                        <span class="stat-meta"><i class="fa-solid fa-trend-up"></i> Keep it up!</span>
+                    </div>
+                    <div class="stat-card glass-panel secondary">
+                        <i class="fa-solid fa-award stat-icon"></i>
+                        <span class="stat-label">XP Tokens</span>
+                        <div class="stat-value" id="statXp">125</div>
+                        <span class="stat-meta" id="statLvlProgress">Level 1 Student</span>
+                    </div>
+                    <div class="stat-card glass-panel pink">
+                        <i class="fa-solid fa-clock stat-icon"></i>
+                        <span class="stat-label">Study Minutes</span>
+                        <div class="stat-value" id="statMinutes">0 Mins</div>
+                        <span class="stat-meta"><i class="fa-solid fa-arrow-trend-up"></i> Dynamic logs</span>
+                    </div>
+                    <div class="stat-card glass-panel success">
+                        <i class="fa-solid fa-clipboard-question stat-icon"></i>
+                        <span class="stat-label">Mock Tests</span>
+                        <div class="stat-value" id="statTests">0 Tests</div>
+                        <span class="stat-meta" id="statAccuracyMeta">Accuracy: --</span>
+                    </div>
+                </div>
+
+                <!-- Main Overview Layout Grid -->
+                <div class="dashboard-layout">
+                    
+                    <!-- Chart Column -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Consistency & Engagement Score</h3>
+                        </div>
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="overviewActivityChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Badges Showcase Column -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Unlocked Achievements</h3>
+                        </div>
+                        <div class="badge-gallery" id="unlockedBadgesGallery">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW B: AI STUDY PLANNER -->
+            <!-- ========================================== -->
+            <section id="view-planner" class="view-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">AI Study Planner</h1>
+                        <p class="page-subtitle">Your dynamically updated curriculum syllabus timetable.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline" id="btnRebuildSchedule">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Recalculate Roadmap
+                        </button>
+                    </div>
+                </div>
+
+                <div class="planner-grid">
+                    
+                    <!-- Left: Checklist / Task Manager -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">High Priority Checklist</h3>
+                            <span class="badge badge-cyan" id="pendingTasksCount">3 Active</span>
+                        </div>
+                        
+                        <form id="addTaskForm" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <input type="text" id="newTaskTitle" class="input-field" placeholder="e.g. Master trigonometry formulas" style="padding: 10px 14px;" required>
+                            <select id="newTaskSubject" class="input-field" style="width: 120px; padding: 10px 14px;">
+                                <option value="Physics">Physics</option>
+                                <option value="Math">Mathematics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="General">General</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">Add</button>
+                        </form>
+
+                        <div id="tasksListContainer">
+                            <!-- Tasks rows loaded dynamically -->
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Daily Timeline Plan -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Suggested Daily Schedule</h3>
+                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" id="btnPrintSchedule">
+                                <i class="fa-solid fa-print"></i> PDF Export
+                            </button>
+                        </div>
+                        
+                        <div class="timeline-container" id="timelineScheduleContainer">
+                            <!-- Populated dynamically by active plans -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW C: AI LEARNING TUTOR -->
+            <!-- ========================================== -->
+            <section id="view-tutor" class="view-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">AI Mentorship & Doubt Solver</h1>
+                        <p class="page-subtitle">Learn core syllabus topics or ask complex doubts at any explanation depth.</p>
+                    </div>
+                </div>
+
+                <div class="chat-wrapper glass-panel">
+                    
+                    <!-- Controls Bar -->
+                    <div class="chat-controls">
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <select id="chatSubjectSelect" class="input-field" style="width: 140px; padding: 8px 12px;">
+                                <option value="general">Select Subject</option>
+                                <option value="physics">Physics / Science</option>
+                                <option value="math">Mathematics</option>
+                                <option value="chemistry">Chemistry</option>
+                            </select>
+                            
+                            <select id="chatLevelSelect" class="input-field" style="width: 160px; padding: 8px 12px;">
+                                <option value="beginner">Beginner (Analogies)</option>
+                                <option value="intermediate" selected>Intermediate (Formulas)</option>
+                                <option value="advanced">Advanced (Academic)</option>
+                            </select>
+
+                            <select id="chatLangSelect" class="input-field" style="width: 140px; padding: 8px 12px;">
+                                <option value="English">English</option>
+                                <option value="Hindi">हिंदी (Hindi)</option>
+                                <option value="Bengali">বাংলা (Bengali)</option>
+                                <option value="Spanish">Español (Spanish)</option>
+                                <option value="French">Français (French)</option>
+                                <option value="German">Deutsch (German)</option>
+                                <option value="Japanese">日本語 (Japanese)</option>
+                                <option value="Mandarin">中文 (Mandarin)</option>
+                                <option value="Russian">Русский (Russian)</option>
+                                <option value="Arabic">العربية (Arabic)</option>
+                                <option value="Portuguese">Português (Portuguese)</option>
+                                <option value="Korean">한국어 (Korean)</option>
+                                <option value="Italian">Italiano (Italian)</option>
+                                <option value="Tamil">தமிழ் (Tamil)</option>
+                                <option value="Telugu">తెలుగు (Telugu)</option>
+                                <option value="Marathi">मराठी (Marathi)</option>
+                                <option value="Gujarati">ગુજરાતી (Gujarati)</option>
+                                <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+                                <option value="Malayalam">മലയാളം (Malayalam)</option>
+                                <option value="Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+                                <option value="Urdu">اُردُو (Urdu)</option>
+                                <option value="Sanskrit">संस्कृत (Sanskrit)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" id="btnStartVideoCallSimulator" style="padding: 8px 16px;">
+                                <i class="fa-solid fa-video"></i> AI Mentor Call
+                            </button>
+                            <button class="btn btn-outline" id="btnToggleSpeech" title="Read responses aloud">
+                                <i class="fa-solid fa-volume-high"></i> Voice Output
+                            </button>
+                            <button class="btn btn-outline" id="btnClearChatHistory" title="Clear Chat">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Bubbles Box -->
+                    <div class="chat-box" id="tutorChatBox">
+                        <!-- Messages populated dynamically -->
+                    </div>
+
+                    <!-- Speech Input Indicator (Visible when speech listener is active) -->
+                    <div id="speechListeningIndicator" style="display:none; padding: 10px 24px; background: rgba(7, 5, 20, 0.9); border-top: 1px solid var(--border-color);">
+                        <div class="voice-indicator">
+                            <div class="voice-pulse-dot"></div>
+                            <span>AI is listening... Speak your question clearly!</span>
+                        </div>
+                    </div>
+
+                    <!-- Notepad/Notes and Image Simulator Panel (Simulates Doubt Solver handwriting/photos upload) -->
+                    <div id="simUploadPanel" style="display: none; padding: 15px 24px; background: var(--bg-surface-glow); border-top: 1px solid var(--border-color); align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="fa-solid fa-image" style="color: var(--color-primary); font-size: 20px;"></i>
+                            <div style="font-size: 13px;">
+                                <strong id="simUploadLabel">question_sheet.png</strong> uploaded! Click send to analyze.
+                            </div>
+                        </div>
+                        <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11px;" id="btnCancelSimUpload">Cancel</button>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="chat-input-bar">
+                        <!-- Mock Upload File/Notes button -->
+                        <button class="btn btn-outline" id="btnSimulateUpload" title="Upload question sheet photo or notebook copy">
+                            <i class="fa-solid fa-camera"></i>
+                        </button>
+                        
+                        <input type="text" id="chatInputField" class="chat-input-el" placeholder="Type a concept you want to learn (e.g. explain gravity) or ask a mathematical doubt...">
+                        
+                        <!-- Speech inputs trigger -->
+                        <button class="btn btn-outline" id="btnVoiceInputTrigger" title="Ask question with your voice">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        
+                        <button class="btn btn-primary" id="btnSendChatMessage">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW D: MOCK TEST ENGINE -->
+            <!-- ========================================== -->
+            <section id="view-mocktest" class="view-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Mock Test Center</h1>
+                        <p class="page-subtitle">Engage in timed, adaptive subject evaluations and analyze performance grades.</p>
+                    </div>
+                </div>
+
+                <div class="test-layout">
+                    
+                    <!-- Left: Active Exam Panel -->
+                    <div class="glass-panel" style="padding: 24px;" id="activeTestContainer">
+                        <div id="testStartPrompt">
+                            <h3 style="margin-bottom: 12px; font-size: 20px;">Begin Dynamic Mock Practice Exam</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 25px;">
+                                Our AI adaptive exam engine tests your learning levels. The exam adapts its complexity based on your profile tracking parameters.
+                            </p>
+                            
+                            <div class="input-group" style="max-width: 250px;">
+                                <label class="input-label">Select Exam Subject</label>
+                                <select id="mockTestSubjectSelect" class="input-field" style="margin-bottom: 10px;">
+                                    <option value="Physics">Physics Practice Mock</option>
+                                    <option value="Math">Mathematics Algebra Mock</option>
+                                    <option value="Chemistry">Chemistry Atoms Mock</option>
+                                    <option value="Mixed">Mixed Full-Syllabus Mock</option>
+                                    <option value="Custom">+ Add Custom Subject...</option>
+                                </select>
+                                <input type="text" id="mockTestCustomSubjectInput" class="input-field" placeholder="Enter custom subject name" style="display: none;">
+                            </div>
+                            
+                            <button class="btn btn-primary" id="btnStartMockTestEngine">
+                                Start Timed Test <i class="fa-solid fa-stopwatch" style="margin-left: 6px;"></i>
+                            </button>
+                        </div>
+
+                        <!-- Active Testing Area (Initially Hidden) -->
+                        <div id="testRunningPanel" style="display: none;">
+                            <div class="panel-header" style="margin-bottom: 25px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="badge badge-purple" id="testTopicHeader">Subject Exam</span>
+                                    <span class="badge badge-cyan" id="testTimeTracker">Time: 00:00</span>
+                                </div>
+                                <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);" id="testQuestionCounter">Question 1 of 4</span>
+                            </div>
+                            
+                            <div class="diag-question-box" style="margin-bottom: 25px;">
+                                <div class="diag-question-text" id="testActiveQuestionText">Question text here?</div>
+                                <div class="diag-options-grid" id="testActiveOptionsGrid">
+                                    <!-- Loaded dynamically -->
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 12px; color: var(--text-muted); font-style: italic;">Your choices persist as you navigate.</span>
+                                <div style="display: flex; gap: 12px;">
+                                    <button class="btn btn-outline" id="btnTestNextQuestion">Skip/Next Question</button>
+                                    <button class="btn btn-success" id="btnTestSubmitExam">Submit Assessment</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Assessment Performance History Logs -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title font-heading">Performance Reports</h3>
+                        </div>
+                        
+                        <div id="perfMockStatsPlaceholder" style="text-align: center; padding: 40px 10px; display: none;">
+                            <i class="fa-solid fa-chart-line" style="font-size: 40px; color: var(--text-dim); margin-bottom: 12px;"></i>
+                            <div style="font-size: 14px; font-weight: 700; color: var(--text-muted);">No reports generated</div>
+                            <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Complete your first mock test to unlock accuracy score distributions.</p>
+                        </div>
+
+                        <div id="perfMockStatsContainer">
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Accuracy Spread</span>
+                                    <span style="font-size: 14px; font-weight: 800; color: var(--color-success);" id="perfLogAccuracy">--</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Tests Completed</span>
+                                    <span style="font-size: 14px; font-weight: 800; color: var(--color-primary);" id="perfLogTotalTests">0 Tests</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Rank Prediction</span>
+                                    <span style="font-size: 14px; font-weight: 800; color: var(--color-pink);" id="perfLogRank">Top 5%</span>
+                                </div>
+                            </div>
+                            
+                            <h4 class="font-heading" style="font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.05em;">History Logs</h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto;" id="testHistoryLogsBox">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW E: MENTAL WELLNESS MODULE -->
+            <!-- ========================================== -->
+            <section id="view-wellness" class="view-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Mental Wellness Companion</h1>
+                        <p class="page-subtitle">Manage exam stress, log daily emotional levels, and practice deep focus breathing.</p>
+                    </div>
+                </div>
+
+                <!-- High Stress Helpline Intervention (Initially Hidden) -->
+                <div class="emergency-banner" id="wellnessHelplineBanner" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h4 style="color: var(--color-danger); font-size: 16px; font-weight: 800;"><i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i> Deep Breath Needed — We detect high stress levels</h4>
+                            <p style="font-size: 13px; color: var(--text-main); margin-top: 4px;">
+                                Exam prep pressure is completely understandable, but your mental peace is more valuable than any scorecard. You are never alone.
+                            </p>
+                        </div>
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 10px; border-color: rgba(255,71,87,0.3); color: var(--color-danger);" id="btnDismissHelplineBanner">Dismiss</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 8px;">
+                        <div class="support-number-row">
+                            <span>AASRA Helpline (India)</span>
+                            <span style="color: var(--color-success);">+91-9820466726</span>
+                        </div>
+                        <div class="support-number-row">
+                            <span>Vandrevala Foundation</span>
+                            <span style="color: var(--color-success);">+91-9999666555</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wellness-grid">
+                    
+                    <!-- Left: Daily Emotional Logs -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Daily Emotional Check-in</h3>
+                        </div>
+                        
+                        <form id="wellnessForm">
+                            <!-- Mood Select -->
+                            <div class="input-group">
+                                <label class="input-label">How are you feeling today?</label>
+                                <div class="mood-grid">
+                                    <div class="mood-card selected" data-mood="Energetic">
+                                        <span class="mood-emoji">⚡</span>
+                                        <span class="mood-label">Energetic</span>
+                                    </div>
+                                    <div class="mood-card" data-mood="Balanced">
+                                        <span class="mood-emoji">😌</span>
+                                        <span class="mood-label">Balanced</span>
+                                    </div>
+                                    <div class="mood-card" data-mood="Tired">
+                                        <span class="mood-emoji">🥱</span>
+                                        <span class="mood-label">Tired</span>
+                                    </div>
+                                    <div class="mood-card" data-mood="Anxious">
+                                        <span class="mood-emoji">😰</span>
+                                        <span class="mood-label">Anxious</span>
+                                    </div>
+                                    <div class="mood-card" data-mood="Overwhelmed">
+                                        <span class="mood-emoji">🤯</span>
+                                        <span class="mood-label">Stressed</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Stress slider -->
+                            <div class="input-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label class="input-label" style="margin-bottom: 0;">Stress / Anxiety Level</label>
+                                    <span style="font-weight: 700; color: var(--color-secondary); font-size: 14px;" id="stressSliderValue">5 / 10</span>
+                                </div>
+                                <input type="range" id="wellnessStressSlider" class="input-field" min="1" max="10" value="5" style="padding: 0; cursor: pointer;">
+                            </div>
+
+                            <!-- Sleep Hours -->
+                            <div class="input-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label class="input-label" style="margin-bottom: 0;">Last Night Sleep Hours</label>
+                                    <span style="font-weight: 700; color: var(--color-primary); font-size: 14px;" id="sleepSliderValue">7 Hours</span>
+                                </div>
+                                <input type="range" id="wellnessSleepSlider" class="input-field" min="1" max="12" step="0.5" value="7" style="padding: 0; cursor: pointer;">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label class="input-label">Mindfulness Thoughts (Optional Journal)</label>
+                                <input type="text" id="wellnessNotes" class="input-field" placeholder="e.g. Worried about tomorrow's biology module test...">
+                            </div>
+
+                            <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                                Log Check-in & Get Feedback <i class="fa-solid fa-signature"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Right: Mindful Breathing Box Breathing -->
+                    <div class="glass-panel text-center" style="padding: 24px; display: flex; flex-direction: column;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Focus & Breathing Synchronizer</h3>
+                            <button class="btn btn-outline" style="padding: 4px 10px; font-size: 11px;" id="btnTriggerBreathingSimulator">
+                                Start Box Breathe
+                            </button>
+                        </div>
+                        
+                        <!-- Dynamic Breath Wave -->
+                        <div class="breathing-box" id="breathWidgetBox">
+                            <div class="breathing-circle-outer">
+                                <div class="breathing-circle-inner" id="breathCircleInner">
+                                    <span class="breathing-label" id="breathBubbleText">Focus</span>
+                                </div>
+                            </div>
+                            
+                            <div class="breath-timer-bar">
+                                <div class="breath-timer-fill" id="breathTimerFill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Advice Output card -->
+                        <div class="wellness-support-card glass-panel" style="padding: 16px; text-align: left; flex-grow: 1; margin-top: 15px; border-radius: 12px; background: rgba(0,0,0,0.2);">
+                            <h4 style="font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fa-solid fa-mug-hot" style="color: var(--color-primary);"></i> AI Wellness Suggestion
+                            </h4>
+                            <div style="font-size: 12px; line-height: 1.5; color: var(--text-muted);" id="wellnessSuggestionPanelText">
+                                Check in above to generate personalized stress-management exercises and tips based on your logs. Sleep is crucial! Keep study blocks below 90 minutes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW F: BILLING & CAREERS -->
+            <!-- ========================================== -->
+            <section id="view-careers" class="view-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Billing & Career roadmap</h1>
+                        <p class="page-subtitle">Unlock advanced features or explore structured career plans designed by AI.</p>
+                    </div>
+                </div>
+
+                <div class="planner-grid">
+                    
+                    <!-- Left: Subscriptions Pricing Panel -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Subscription Tier</h3>
+                        </div>
+                        
+                        <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: rgba(0, 242, 254, 0.03); border-radius: 12px; border: 1px solid rgba(0, 242, 254, 0.15);">
+                            <span class="badge badge-cyan" style="margin-bottom: 10px;">Free Trial Active</span>
+                            <div style="font-size: 32px; font-weight: 800;">₹49 <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">/ Month</span></div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Includes full adaptivity, continuous mood analysis, and custom roadmaps.</p>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; font-size: 13px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>All AI Tutor explanations & modes</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>Unlimited diagnostic tests & analytics</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>Full Spaced Repetition study planners</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" id="btnTriggerMockCheckout">
+                            Upgrade to Premium Series <i class="fa-solid fa-credit-card"></i>
+                        </button>
+                        
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="#" style="font-size: 12px; color: var(--color-secondary); font-weight: 700; text-decoration: none;" id="btnTriggerScholarshipModal">
+                                Apply for Special Need Scholarship?
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right: Career Guidance Path Generator -->
+                    <div class="glass-panel" style="padding: 24px;">
+                        <div class="panel-header">
+                            <h3 class="panel-title">AI Career Path Advisor</h3>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label class="input-label">Select Target Path</label>
+                            <div style="display: flex; gap: 10px;">
+                                <select id="careerPathSelector" class="input-field">
+                                    <option value="ai">AI / Machine Learning Engineer</option>
+                                    <option value="upsc">Civil Services (UPSC Aspirant)</option>
+                                    <option value="academic">General Academic/Boards Mastery</option>
+                                </select>
+                                <button class="btn btn-secondary" style="padding: 10px 18px;" id="btnGenerateCareerRoadmap">Generate</button>
+                            </div>
+                        </div>
+
+                        <div id="careerRoadmapResultsContainer" style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 18px;">
+                            <h4 id="careerRoadmapTitle" style="color: var(--color-primary); font-size: 15px; margin-bottom: 4px;">AI Engineering Career Path</h4>
+                            <p id="careerRoadmapDesc" style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Syllabus outline parameters loaded below.</p>
+                            
+                            <div id="careerRoadmapStepsList" style="display: flex; flex-direction: column; gap: 12px;">
+                                <!-- Dynamically loaded step tags -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3. INTERACTIVE FEEDBACK MODALS OVERLAYS -->
+    <!-- ======================================================== -->
+    
+    <!-- A. Stripe Secure Payment Gateway Modal -->
+    <div class="modal-overlay" id="checkoutModalOverlay">
+        <div class="modal-box glass-panel text-center">
+            <h3 style="margin-bottom: 12px; font-size: 20px;"><i class="fa-solid fa-shield-halved" style="color: var(--color-primary); margin-right: 6px;"></i> Stripe Secure Checkout</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 25px;">
+                Subscribe to **Your AI Partner Premium Subscription (₹49.00)**. Enjoy unlimited learning!
+            </p>
+            
+            <div id="stripeProductionOption" style="display: none; background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 25px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                    <span>Secure Stripe billing portal integration</span>
+                    <strong style="color: var(--color-success);"><i class="fa-solid fa-lock"></i> SSL Secured</strong>
+                </div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 0;">
+                    You will be redirected straight to Stripe's secure payment canvas to process your credit card, debit card, or mobile wallets safely.
+                </p>
+            </div>
+
+            <div id="stripeMockOption" style="background: rgba(244,63,94,0.06); border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 25px; border: 1px dashed rgba(244,63,94,0.3);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+                    <span style="color: var(--color-danger); font-weight: 700;">Development Simulated Gateway</span>
+                    <strong>₹49.00</strong>
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+                    Stripe secret keys are not configured in your environment. You can bypass the transaction and simulate a successful payment instantly.
+                </p>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label class="input-label">Select Mock Method</label>
+                    <select id="mockCheckoutPaymentType" class="input-field" style="padding: 10px 14px;">
+                        <option value="sim_stripe">Simulated Stripe Card</option>
+                        <option value="sim_upi">Simulated GPay / UPI</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-outline" id="btnCancelCheckout" style="flex:1;">Cancel</button>
+                <button class="btn btn-success" id="btnSubmitMockCheckout" style="flex:2;">Proceed to Checkout 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- B. Scholarship Request Form Modal -->
+    <div class="modal-overlay" id="scholarshipModalOverlay">
+        <div class="modal-box glass-panel">
+            <h3 style="margin-bottom: 12px; font-size: 20px;"><i class="fa-solid fa-graduation-cap" style="color: var(--color-secondary); margin-right: 6px;"></i> Scholarship Application</h3>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
+                We strongly believe financial constraints should never halt learning. Fill in details to request 100% free premium access.
+            </p>
+            
+            <form id="scholarshipForm">
+                <div class="input-group">
+                    <label class="input-label">Brief Reason for Waiver Request</label>
+                    <textarea class="input-field" style="height: 80px; resize: none;" placeholder="Explain your situation briefly..." required id="scholarshipReasonInput"></textarea>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Annual Family Income Category</label>
+                    <select class="input-field" required>
+                        <option value="1">Less than ₹1.5 Lakhs</option>
+                        <option value="2">₹1.5 Lakhs - ₹3 Lakhs</option>
+                        <option value="3">Other / Specific Need Case</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <button type="button" class="btn btn-outline" id="btnCancelScholarship" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-secondary" style="flex: 2;">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- C. Simulated Image Upload Selection Modal -->
+    <div class="modal-overlay" id="uploadModalOverlay">
+        <div class="modal-box glass-panel text-center">
+            <h3 style="margin-bottom: 10px; font-size: 20px;"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--color-primary); margin-right: 6px;"></i> Simulated Notebook / Doubt Upload</h3>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
+                Select a simulated image below to upload it directly to the Doubt Solver.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
+                <div class="diag-option-row" data-upload-file="trig_identities.png" style="text-align: left;">
+                    <i class="fa-solid fa-file-image" style="font-size: 20px; color: var(--color-primary);"></i>
+                    <div style="flex-grow: 1;">
+                        <strong style="font-size: 13px; display: block;">trig_identities.png</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);">Handwritten math identities doubt</span>
+                    </div>
+                </div>
+                <div class="diag-option-row" data-upload-file="newton_laws.jpg" style="text-align: left;">
+                    <i class="fa-solid fa-file-image" style="font-size: 20px; color: var(--color-secondary);"></i>
+                    <div style="flex-grow: 1;">
+                        <strong style="font-size: 13px; display: block;">newton_laws.jpg</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);">Physics forces diagram photo</span>
+                    </div>
+                </div>
+                <div class="diag-option-row" data-upload-file="organic_chem_sheet.pdf" style="text-align: left;">
+                    <i class="fa-solid fa-file-pdf" style="font-size: 20px; color: var(--color-pink);"></i>
+                    <div style="flex-grow: 1;">
+                        <strong style="font-size: 13px; display: block;">organic_chem_sheet.pdf</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);">Scan of chemistry compounds doubt</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn btn-outline" style="width: 100%;" id="btnCancelSimulateUpload">Cancel</button>
+        </div>
+    </div>
+
+    <!-- D. AI Mentor Video Call Simulator Overlay (Full Screen Glass panel) -->
+    <div class="modal-overlay" id="videoCallOverlay" style="background: rgba(5, 3, 15, 0.95);">
+        <div class="glass-panel" style="width: 90%; max-width: 950px; height: 85vh; display: flex; flex-direction: column; overflow: hidden; padding: 0; border-color: rgba(0, 242, 254, 0.2);">
+            
+            <!-- Video Call Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: rgba(7, 5, 20, 0.7); border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--color-danger); animation: voicePulse 1.2s infinite;"></div>
+                    <strong style="font-family: var(--font-heading); font-size: 16px;">AI Mentor Live Session (1-Hour Test Session)</strong>
+                </div>
+                <div style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--color-primary); letter-spacing: 0.05em;" id="videoCallTimerText">
+                    60:00
+                </div>
+            </div>
+            
+            <!-- Video Box Streams Canvas -->
+            <div style="flex-grow: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                
+                <!-- AI Mentor Feed Screen (Background/Large) -->
+                <div id="aiMentorVideoFeed" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 1;">
+                    <!-- Pulse waves of avatar -->
+                    <div style="position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%); animation: rotateLogo 15s linear infinite;"></div>
+                    
+                    <div style="width: 150px; height: 150px; border-radius: 50%; background: var(--gradient-secondary); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-neon-secondary); border: 4px solid rgba(255,255,255,0.1); z-index: 2;" id="aiMentorCallAvatar">
+                        <i class="fa-solid fa-graduation-cap" style="font-size: 64px; color: #fff;"></i>
+                    </div>
+                    
+                    <div style="margin-top: 25px; font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: #fff; z-index: 2;" id="aiMentorCallStatusText">
+                        AI Mentor listening...
+                    </div>
+                    
+                    <!-- Dynamic Voice visualizer bar waves -->
+                    <div style="display: flex; gap: 6px; align-items: center; height: 40px; margin-top: 15px; z-index: 2;" id="aiVoiceWaveBars">
+                        <div style="width: 4px; height: 10px; background: var(--color-primary); border-radius: 3px; transition: height 0.15s ease;"></div>
+                        <div style="width: 4px; height: 25px; background: var(--color-primary); border-radius: 3px; transition: height 0.15s ease;"></div>
+                        <div style="width: 4px; height: 15px; background: var(--color-primary); border-radius: 3px; transition: height 0.15s ease;"></div>
+                        <div style="width: 4px; height: 35px; background: var(--color-primary); border-radius: 3px; transition: height 0.15s ease;"></div>
+                        <div style="width: 4px; height: 20px; background: var(--color-primary); border-radius: 3px; transition: height 0.15s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- Floating Student Feed Screen (Small Pip Screen) -->
+                <div style="position: absolute; bottom: 20px; right: 20px; width: 180px; height: 135px; border-radius: 12px; background: var(--bg-surface); border: 2px solid rgba(255,255,255,0.15); box-shadow: var(--shadow-glass); overflow: hidden; z-index: 10;" id="studentVideoContainer">
+                    <video id="videoCallLocalVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                    <!-- Student placeholder avatar if camera off -->
+                    <div id="studentCallPlaceholder" style="width: 100%; height: 100%; display: none; align-items: center; justify-content: center; background: var(--gradient-primary); color: #070514; font-weight: 800; font-size: 28px;">
+                        U
+                    </div>
+                </div>
+                
+                <!-- live caption box -->
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 70%; background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; border-radius: 10px; z-index: 9; text-align: center;" id="videoCallSubtitleBox">
+                    <span style="font-size: 13px; color: var(--text-muted); font-style: italic;" id="videoCallSubtitleText">AI: "Hello! I am your AI Success Mentor. Tap the microphone and say something to begin our 1-hour coaching session."</span>
+                </div>
+            </div>
+
+            <!-- Controls Footer Panel -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; background: rgba(7, 5, 20, 0.8); border-top: 1px solid var(--border-color);">
+                <div style="font-size: 13px; color: var(--text-muted);">
+                    <i class="fa-solid fa-microphone-lines" style="color: var(--color-primary); margin-right: 6px;"></i> Live voice mentoring chat enabled.
+                </div>
+                
+                <!-- Action circular buttons -->
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button class="btn btn-outline btn-icon" id="btnVideoCallToggleMic" title="Mute/Unmute Mic" style="width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <button class="btn btn-outline btn-icon" id="btnVideoCallToggleCam" title="Turn Camera On/Off" style="width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-video"></i>
+                    </button>
+                    <button class="btn btn-danger btn-icon" id="btnVideoCallEndCall" title="End Call Session" style="width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-phone-slash"></i>
+                    </button>
+                </div>
+                
+                <div style="font-size: 13px; color: var(--color-success);" id="videoCallNetworkStatus">
+                    <i class="fa-solid fa-circle-dot" style="margin-right: 6px;"></i> Live session
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- D. Ollama AI Server Settings Modal -->
+    <div class="modal-overlay" id="aiSettingsModalOverlay">
+        <div class="modal-box glass-panel">
+            <h3 style="margin-bottom: 12px; font-size: 20px;"><i class="fa-solid fa-gear" style="color: var(--color-primary); margin-right: 6px;"></i> AI Partner Settings</h3>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
+                Configure your local open-source LLM server (Ollama) and manage your persistent data.
+            </p>
+            
+            <form id="aiSettingsForm">
+                <div class="input-group">
+                    <label class="input-label">Ollama Model Selection</label>
+                    <select id="settingsOllamaModelSelect" class="input-field" style="padding: 10px 14px; margin-bottom: 10px;">
+                        <option value="llama3">llama3 (Default)</option>
+                        <option value="mistral">mistral</option>
+                        <option value="gemma">gemma</option>
+                        <option value="phi3">phi3</option>
+                        <option value="Custom">-- Custom Model --</option>
+                    </select>
+                    
+                    <input type="text" id="settingsCustomModelInput" class="input-field" placeholder="Enter custom model name (e.g. llama3:8b)..." style="display: none; padding: 10px 14px;">
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; font-size: 11px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span>Ollama Server Status:</span>
+                        <strong id="settingsOllamaStatus" style="color: var(--color-danger);">Offline</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span>Server Host:</span>
+                        <strong>http://localhost:11434</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Local SQLite Database:</span>
+                        <strong style="color: var(--color-success);">Active (your_ai_partner.db)</strong>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
+                    <button type="button" class="btn btn-outline" id="btnCancelAiSettings" style="flex: 1;">Close</button>
+                    <button type="button" class="btn btn-primary" id="btnRefreshServerStatus" style="flex: 1;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    <button type="submit" class="btn btn-success" style="flex: 1.5;">Save Settings</button>
+                </div>
+                
+                <button type="button" class="btn btn-outline" id="btnWipeSqliteDb" style="width: 100%; border-color: rgba(244,63,94,0.3); color: var(--color-danger); font-size: 11px; padding: 8px;" title="Wipe Database">
+                    <i class="fa-solid fa-trash-can"></i> Reset Persistent SQLite Database
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- E. AI Mock Question Generation Overlay -->
+    <div class="modal-overlay" id="examGenerationOverlay" style="background: rgba(5, 3, 15, 0.9);">
+        <div class="modal-box glass-panel text-center" style="max-width: 400px; padding: 40px 20px;">
+            <div style="margin-bottom: 25px;">
+                <i class="fa-solid fa-atom fa-spin" style="font-size: 50px; color: var(--color-primary); display: inline-block;"></i>
+            </div>
+            <h3 style="margin-bottom: 10px; font-size: 18px; font-weight: 700;">Synthesizing Mock Exam...</h3>
+            <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6;" id="examGenerationStatusText">
+                Connecting to local Ollama AI to generate 4 customized diagnostic questions based on your subject...
+            </p>
+            <div style="margin-top: 20px; width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; position: relative;">
+                <div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: var(--color-primary); border-radius: 2px; animation: progress-bar 2s infinite ease-in-out;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- F. Multi-User Authentication Modal Overlay -->
+    <div class="modal-overlay" id="authModalOverlay">
+        <div class="modal-box glass-panel" style="max-width: 400px; padding: 32px;">
+            <div style="display: flex; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 25px;">
+                <button type="button" id="tabSignIn" style="background: none; border: none; color: var(--color-primary); font-family: var(--font-heading); font-size: 16px; font-weight: 800; cursor: pointer; border-bottom: 2px solid var(--color-primary); padding-bottom: 4px;">Sign In</button>
+                <button type="button" id="tabSignUp" style="background: none; border: none; color: var(--text-muted); font-family: var(--font-heading); font-size: 16px; font-weight: 700; cursor: pointer; padding-bottom: 4px;">Sign Up</button>
+            </div>
+            
+            <form id="authForm">
+                <div class="input-group" id="authNameGroup" style="display: none;">
+                    <label class="input-label">Full Name</label>
+                    <input type="text" id="authNameInput" class="input-field" placeholder="Enter your full name...">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Email Address</label>
+                    <input type="email" id="authEmailInput" class="input-field" placeholder="student@email.com" required autocomplete="username">
+                </div>
+                
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label class="input-label">Password</label>
+                    <input type="password" id="authPasswordInput" class="input-field" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="btnSubmitAuth" style="width: 100%; padding: 12px;">Sign In to Account 🚀</button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" style="font-size: 12px; color: var(--text-muted); text-decoration: none;" id="btnContinueAsGuest">
+                        Continue as Guest (Save locally)
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 4. CORE CONTROLLER JS MODULES -->
+    <!-- ======================================================== -->
+    <script src="state.js"></script>
+    <script src="ai-service.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>

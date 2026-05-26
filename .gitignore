@@ -1,0 +1,19 @@
+# Ignore local SQLite database
+your_ai_partner.db
+
+# Ignore Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore environment variables
+.env

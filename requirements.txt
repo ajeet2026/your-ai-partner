@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+PyJWT
+bcrypt
+email-validator
+psycopg2-binary
