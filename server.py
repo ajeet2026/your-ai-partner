@@ -351,7 +351,7 @@ async def chat_with_ollama(payload: ChatProxyModel):
             method='POST'
         )
         
-        with urllib.request.urlopen(req, timeout=30.0) as response:
+        with urllib.request.urlopen(req, timeout=1.5) as response:
             ollama_res = json.loads(response.read().decode('utf-8'))
             reply = ollama_res.get("message", {}).get("content", "")
             return {"success": True, "reply": reply}
@@ -386,7 +386,7 @@ Ensure the response contains valid JSON structure only."""
             method='POST'
         )
         
-        with urllib.request.urlopen(req, timeout=30.0) as response:
+        with urllib.request.urlopen(req, timeout=1.5) as response:
             ollama_res = json.loads(response.read().decode('utf-8'))
             response_text = ollama_res.get("response", "").strip()
             questions = json.loads(response_text)
