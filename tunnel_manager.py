@@ -98,11 +98,19 @@ def print_banner(url, provider_name):
         
     generate_qr_terminal(url)
 
-def run_tunnel(provider="localhost_run"):
+def run_tunnel(provider="cloudflare"):
     """
     Launches and monitors the tunnel process. Parses output dynamically for URLs.
     """
-    if provider == "localhost_run":
+    if provider == "cloudflare":
+        # Prefer the local arm64 binary we downloaded
+        cf_bin = os.path.join(DIRECTORY, "cloudflared")
+        if not os.path.exists(cf_bin):
+            cf_bin = "cloudflared" # fallback
+        cmd = [cf_bin, "tunnel", "--url", f"http://localhost:{PORT}"]
+        provider_name = "Cloudflare Tunnel"
+        url_regex = re.compile(r'https://[a-zA-Z0-9.-]+\.trycloudflare\.com')
+    elif provider == "localhost_run":
         cmd = [
             "ssh",
             "-o", "StrictHostKeyChecking=no",
@@ -125,7 +133,7 @@ def run_tunnel(provider="localhost_run"):
         provider_name = "pinggy.io"
         url_regex = re.compile(r'https?://[a-zA-Z0-9.-]+\.pinggy\.link')
 
-    print(f"\n{YELLOW}⚡ Connecting to {provider_name} SSH tunnel...{RESET}")
+    print(f"\n{YELLOW}⚡ Connecting to {provider_name} tunnel...{RESET}")
     
     proc = subprocess.Popen(
         cmd,
@@ -170,8 +178,8 @@ def main():
     # 1. Start server.py if not active
     server_process = check_and_start_server()
     
-    # 2. Start SSH tunnel in a resilient self-healing loop
-    providers = ["localhost_run", "pinggy"]
+    # 2. Start tunnel in a resilient self-healing loop
+    providers = ["cloudflare", "localhost_run", "pinggy"]
     current_idx = 0
     
     try:
