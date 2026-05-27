@@ -1236,3 +1236,91 @@ canvas#skillGraphCanvas {
     50% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
 }
+
+/* Markdown styling inside AI chat messages */
+.chat-msg-text h1, .chat-msg-text h2, .chat-msg-text h3, .chat-msg-text h4 {
+    margin: 10px 0 6px;
+    color: var(--color-primary);
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+}
+.chat-msg-text h1 { font-size: 16px; }
+.chat-msg-text h2 { font-size: 15px; }
+
+.chat-msg-text p {
+    margin: 4px 0;
+    line-height: 1.6;
+}
+
+.chat-msg-text ul, .chat-msg-text ol {
+    margin: 6px 0;
+    padding-left: 20px;
+}
+
+.chat-msg-text li {
+    margin: 3px 0;
+    line-height: 1.5;
+}
+
+.chat-msg-text code {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--color-primary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.chat-msg-text pre {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    overflow-x: auto;
+}
+
+.chat-msg-text pre code {
+    background: none;
+    padding: 0;
+    color: #e0e0e0;
+    font-size: 12px;
+}
+
+.chat-msg-text blockquote {
+    border-left: 3px solid var(--color-primary);
+    margin: 8px 0;
+    padding: 6px 12px;
+    background: rgba(139, 92, 246, 0.08);
+    border-radius: 0 6px 6px 0;
+    color: var(--text-muted);
+}
+
+.chat-msg-text strong {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.chat-msg-text em {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.chat-msg-text table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12px;
+}
+
+.chat-msg-text th, .chat-msg-text td {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 10px;
+    text-align: left;
+}
+
+.chat-msg-text th {
+    background: rgba(139, 92, 246, 0.1);
+    font-weight: 700;
+}

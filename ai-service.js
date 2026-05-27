@@ -216,8 +216,60 @@ class AIService {
     }
 
     async getTutorResponse(question, subject = 'general', level = 'intermediate', language = 'English') {
-        const selectedModel = (window.AppStore && window.AppStore.state.selectedModel) || 'llama3';
+        const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
+        const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU";
         
+        if (provider === "cloud_gemini" && geminiKey) {
+            try {
+                const systemPrompt = `You are "Your AI Partner", an empathetic, highly skilled personalized study tutor.
+The student has chosen the language "${language}", learning level "${level}", and academic subject "${subject}".
+Always structure your answers beautifully with markdown, explain core concepts with simple analogies (especially if the level is beginner), and be extremely motivating. Encourage them with positive feedback. Speak in their preferred language.`;
+
+                const recentHistory = (window.AppStore && window.AppStore.state.chatHistory || [])
+                    .slice(-6)
+                    .filter(m => m.id !== 'c1')
+                    .map(m => ({
+                        role: m.sender === 'user' ? 'user' : 'model',
+                        parts: [{ text: m.text }]
+                    }));
+                
+                recentHistory.push({
+                    role: 'user',
+                    parts: [{ text: question }]
+                });
+
+                const payload = {
+                    contents: recentHistory,
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                    generationConfig: {
+                        temperature: 0.7
+                    }
+                };
+
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                } else {
+                    const err = await res.json();
+                    console.error("Gemini API Error: ", err);
+                }
+            } catch (e) {
+                console.error("Gemini request failed, running simulated fallback:", e);
+            }
+            return this.askTutor(question, subject, level, language);
+        }
+
+        const selectedModel = (window.AppStore && window.AppStore.state.selectedModel) || 'gemma3:1b';
         try {
             const recentHistory = (window.AppStore && window.AppStore.state.chatHistory || [])
                 .slice(-6)
@@ -258,7 +310,59 @@ Always structure your answers beautifully with markdown, explain core concepts w
     }
 
     async getCustomQuestions(subject, examType = 'General') {
-        const selectedModel = (window.AppStore && window.AppStore.state.selectedModel) || 'llama3';
+        const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
+        const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU";
+        
+        if (provider === "cloud_gemini" && geminiKey) {
+            try {
+                const prompt = `Generate exactly 4 multiple-choice questions for a diagnostic test on the subject '${subject}' suitable for a student preparing for the '${examType}' exam.
+The output MUST be a JSON array of exactly 4 objects. Do not wrap in markdown or add explanations outside the JSON structure.
+
+Each question object in the array must have exactly these keys:
+1. "question": The question string.
+2. "options": An array of exactly 4 strings.
+3. "answer": The index (0, 1, 2, or 3) of the correct option.
+4. "explanation": A detailed explanation of why that option is correct.
+
+Ensure the response contains valid JSON structure only.`;
+
+                const payload = {
+                    contents: [
+                        { role: 'user', parts: [{ text: prompt }] }
+                    ],
+                    generationConfig: {
+                        responseMimeType: 'application/json',
+                        temperature: 0.2
+                    }
+                };
+
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                        const rawText = data.candidates[0].content.parts[0].text.trim();
+                        const questions = JSON.parse(rawText);
+                        if (Array.isArray(questions) && questions.length > 0) {
+                            return questions.map((q, idx) => ({
+                                id: 500 + idx,
+                                subject: subject,
+                                ...q
+                            }));
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Gemini Quiz request failed, using simulated fallback:", e);
+            }
+            return this.generateCustomQuestions(subject);
+        }
+
+        const selectedModel = (window.AppStore && window.AppStore.state.selectedModel) || 'gemma3:1b';
         try {
             const res = await fetch('/api/quiz/generate', {
                 method: 'POST',

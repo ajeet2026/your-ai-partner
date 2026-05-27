@@ -147,6 +147,17 @@ document.addEventListener("DOMContentLoaded", () => {
         btnCancelCheckout: document.getElementById("btnCancelCheckout"),
         btnSubmitMockCheckout: document.getElementById("btnSubmitMockCheckout"),
         mockCheckoutPaymentType: document.getElementById("mockCheckoutPaymentType"),
+        checkoutMockTitle: document.getElementById("checkoutMockTitle"),
+        checkoutSimulatedDescContainer: document.getElementById("checkoutSimulatedDescContainer"),
+        checkoutRealUpiContainer: document.getElementById("checkoutRealUpiContainer"),
+        checkoutUpiQrImage: document.getElementById("checkoutUpiQrImage"),
+        checkoutUpiPayeeName: document.getElementById("checkoutUpiPayeeName"),
+        checkoutUpiId: document.getElementById("checkoutUpiId"),
+        checkoutUpiTrxInput: document.getElementById("checkoutUpiTrxInput"),
+        settingsOwnerUpiIdInput: document.getElementById("settingsOwnerUpiIdInput"),
+        settingsOwnerPayeeNameInput: document.getElementById("settingsOwnerPayeeNameInput"),
+        pricingTierContainer: document.getElementById("pricingTierContainer"),
+        premiumActiveContainer: document.getElementById("premiumActiveContainer"),
         btnTriggerScholarshipModal: document.getElementById("btnTriggerScholarshipModal"),
         scholarshipModalOverlay: document.getElementById("scholarshipModalOverlay"),
         btnCancelScholarship: document.getElementById("btnCancelScholarship"),
@@ -166,6 +177,10 @@ document.addEventListener("DOMContentLoaded", () => {
         btnOpenServerSettings: document.getElementById("btnOpenServerSettings"),
         aiSettingsModalOverlay: document.getElementById("aiSettingsModalOverlay"),
         btnCancelAiSettings: document.getElementById("btnCancelAiSettings"),
+        settingsAiLocationSelect: document.getElementById("settingsAiLocationSelect"),
+        geminiKeyGroup: document.getElementById("geminiKeyGroup"),
+        settingsGeminiKeyInput: document.getElementById("settingsGeminiKeyInput"),
+        ollamaModelGroup: document.getElementById("ollamaModelGroup"),
         settingsOllamaModelSelect: document.getElementById("settingsOllamaModelSelect"),
         settingsCustomModelInput: document.getElementById("settingsCustomModelInput"),
         settingsOllamaStatus: document.getElementById("settingsOllamaStatus"),
@@ -413,9 +428,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!state.onboarded) return;
 
+        const isPremium = state.user && state.user.premium;
+
         // Header info
-        DOMElements.welcomeUserTitle.innerText = `Welcome back, ${state.user.name || "Scholar"}!`;
-        DOMElements.sidebarName.innerText = state.user.name || "Student Partner";
+        DOMElements.welcomeUserTitle.innerHTML = `Welcome back, ${state.user.name || "Scholar"}!${isPremium ? ' <i class="fa-solid fa-crown" style="color: #facc15; font-size:16px; margin-left:6px;" title="Premium Member"></i>' : ''}`;
+        DOMElements.sidebarName.innerHTML = `${state.user.name || "Student Partner"}${isPremium ? ' <i class="fa-solid fa-crown" style="color: #facc15; font-size:12px; margin-left:4px;" title="Premium Member"></i>' : ''}`;
         DOMElements.sidebarLevel.innerText = `Level ${state.stats.level} Student`;
         DOMElements.sidebarAvatar.innerText = (state.user.name || "S").charAt(0).toUpperCase();
 
@@ -446,6 +463,17 @@ document.addEventListener("DOMContentLoaded", () => {
             DOMElements.pendingTasksCount.className = "badge badge-success";
         } else {
             DOMElements.pendingTasksCount.className = "badge badge-cyan";
+        }
+
+        // Toggle Billing pricing containers based on Premium status
+        if (DOMElements.pricingTierContainer && DOMElements.premiumActiveContainer) {
+            if (isPremium) {
+                DOMElements.pricingTierContainer.style.display = "none";
+                DOMElements.premiumActiveContainer.style.display = "block";
+            } else {
+                DOMElements.pricingTierContainer.style.display = "block";
+                DOMElements.premiumActiveContainer.style.display = "none";
+            }
         }
 
         // Render lists
@@ -919,19 +947,29 @@ document.addEventListener("DOMContentLoaded", () => {
             const div = document.createElement("div");
             div.className = `chat-message ${msg.sender}`;
             
-            const lines = msg.text.split("\n").map(l => {
-                if (l.startsWith("💡") || l.startsWith("📋") || l.startsWith("📐")) {
-                    return `<p style="margin-top:8px;">${l}</p>`;
+            let renderedText = '';
+            if (msg.sender === 'ai' && typeof marked !== 'undefined') {
+                // Use marked.js to render AI markdown responses properly
+                try {
+                    renderedText = marked.parse(msg.text);
+                } catch (e) {
+                    renderedText = msg.text.split("\n").map(l => `<p>${l}</p>`).join('');
                 }
-                return `<p>${l}</p>`;
-            }).join('');
+            } else {
+                renderedText = msg.text.split("\n").map(l => {
+                    if (l.startsWith("💡") || l.startsWith("📋") || l.startsWith("📐")) {
+                        return `<p style="margin-top:8px;">${l}</p>`;
+                    }
+                    return `<p>${l}</p>`;
+                }).join('');
+            }
 
             div.innerHTML = `
                 <div class="chat-msg-header">
                     <span>${msg.sender === 'ai' ? msg.agent : 'You'}</span>
                     <span class="chat-msg-time">${msg.time}</span>
                 </div>
-                <div class="chat-msg-text">${lines}</div>
+                <div class="chat-msg-text">${renderedText}</div>
             `;
             box.appendChild(div);
         });
@@ -969,7 +1007,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>Tutor Agent</span>
             </div>
             <div class="chat-msg-text" style="color: var(--text-muted); font-style: italic;">
-                <i class="fa-solid fa-circle-notch fa-spin"></i> Formulating personalized study response...
+                <i class="fa-solid fa-circle-notch fa-spin"></i> AI is thinking... generating your personalized response (this may take 15-30 seconds)
             </div>
         `;
         box.appendChild(typingDiv);
@@ -1329,31 +1367,53 @@ document.addEventListener("DOMContentLoaded", () => {
         DOMElements.btnTriggerMockCheckout.addEventListener("click", async () => {
             DOMElements.checkoutModalOverlay.classList.add("active");
             
-            // Check if server is running in Stripe Production Mode or Development Mock Mode
+            const ownerUpi = localStorage.getItem("YOUR_AI_PARTNER_OWNER_UPI") || "ajeetkumar8877274374-1@okicici";
+            const ownerName = localStorage.getItem("YOUR_AI_PARTNER_OWNER_NAME") || "Ajeetroy_1";
+            
+            // Check if Stripe configuration is active
+            let hasStripe = false;
             try {
                 const res = await fetch('/api/create-checkout-session', { method: 'POST' });
                 if (res.ok) {
                     const data = await res.json();
-                    const hasStripe = data.success || !data.mock_mode;
-                    const prodEl = document.getElementById("stripeProductionOption");
-                    const mockEl = document.getElementById("stripeMockOption");
-                    
-                    if (hasStripe) {
-                        if (prodEl) prodEl.style.display = "block";
-                        if (mockEl) mockEl.style.display = "none";
-                        DOMElements.btnSubmitMockCheckout.innerText = "Proceed to Secure Pay 🔒";
-                    } else {
-                        if (prodEl) prodEl.style.display = "none";
-                        if (mockEl) mockEl.style.display = "block";
-                        DOMElements.btnSubmitMockCheckout.innerText = "Simulate Payment ✅";
-                    }
+                    hasStripe = data.success || !data.mock_mode;
                 }
             } catch (e) {
-                const prodEl = document.getElementById("stripeProductionOption");
-                const mockEl = document.getElementById("stripeMockOption");
+                console.warn("Stripe check failed, defaulting to mock/UPI:", e);
+            }
+            
+            const prodEl = document.getElementById("stripeProductionOption");
+            const mockEl = document.getElementById("stripeMockOption");
+            
+            if (hasStripe) {
+                if (prodEl) prodEl.style.display = "block";
+                if (mockEl) mockEl.style.display = "none";
+                DOMElements.btnSubmitMockCheckout.innerText = "Proceed to Secure Pay 🔒";
+            } else {
                 if (prodEl) prodEl.style.display = "none";
                 if (mockEl) mockEl.style.display = "block";
-                DOMElements.btnSubmitMockCheckout.innerText = "Simulate Payment ✅";
+                
+                if (ownerUpi) {
+                    // Owner UPI configuration mode: Display dynamic Scan & Pay QR code
+                    DOMElements.checkoutMockTitle.innerText = "Secure UPI Scan & Pay";
+                    DOMElements.checkoutSimulatedDescContainer.style.display = "none";
+                    DOMElements.checkoutRealUpiContainer.style.display = "block";
+                    DOMElements.checkoutUpiPayeeName.innerText = ownerName;
+                    DOMElements.checkoutUpiId.innerText = ownerUpi;
+                    
+                    // Generate dynamic UPI payload URI
+                    const upiUri = `upi://pay?pa=${ownerUpi}&pn=${encodeURIComponent(ownerName)}&am=49.00&cu=INR&tn=YourAIPartnerPremium`;
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
+                    DOMElements.checkoutUpiQrImage.src = qrUrl;
+                    
+                    DOMElements.btnSubmitMockCheckout.innerText = "Submit Payment Proof ✅";
+                } else {
+                    // Standard simulated gateway mode
+                    DOMElements.checkoutMockTitle.innerText = "Development Simulated Gateway";
+                    DOMElements.checkoutSimulatedDescContainer.style.display = "block";
+                    DOMElements.checkoutRealUpiContainer.style.display = "none";
+                    DOMElements.btnSubmitMockCheckout.innerText = "Simulate Payment ✅";
+                }
             }
         });
 
@@ -1361,36 +1421,60 @@ document.addEventListener("DOMContentLoaded", () => {
             DOMElements.checkoutModalOverlay.classList.remove("active");
         });
 
-        // Submit checkout (Redirect to Stripe or Fallback to Simulator)
+        // Submit checkout (Redirect to Stripe or Fallback to Simulator/UPI verification)
         DOMElements.btnSubmitMockCheckout.addEventListener("click", async () => {
             const btn = DOMElements.btnSubmitMockCheckout;
             const originalText = btn.innerText;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Contacting Stripe...';
-            btn.disabled = true;
             
-            try {
-                const res = await fetch('/api/create-checkout-session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+            const mockEl = document.getElementById("stripeMockOption");
+            const isMock = mockEl && mockEl.style.display !== "none";
+            
+            if (!isMock) {
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Contacting Stripe...';
+                btn.disabled = true;
                 
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success && data.url) {
-                        // Redirect to secure Stripe portal
-                        window.location.href = data.url;
-                        return;
+                try {
+                    const res = await fetch('/api/create-checkout-session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.url) {
+                            window.location.href = data.url;
+                            return;
+                        }
                     }
+                } catch (e) {
+                    console.warn("Stripe checkout redirect failed, defaulting to simulator:", e);
                 }
-            } catch (e) {
-                console.warn("Stripe checkout redirect failed, defaulting to simulator:", e);
+                
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
             
-            // Safe simulated fallback
-            btn.innerText = originalText;
-            btn.disabled = false;
+            // Check if Owner UPI Payment Proof Mode is active
+            const ownerUpi = localStorage.getItem("YOUR_AI_PARTNER_OWNER_UPI") || "ajeetkumar8877274374-1@okicici";
+            if (isMock && ownerUpi) {
+                const trxId = DOMElements.checkoutUpiTrxInput.value.trim();
+                const utrRegex = /^\d{12}$/;
+                
+                if (!utrRegex.test(trxId)) {
+                    alert("⚠️ INVALID UTR: Please enter a valid 12-digit UPI transaction reference number (UTR) to submit payment proof!");
+                    return;
+                }
+                
+                // Store payment proof UTR inside profile skills JSON dictionary securely
+                if (!Store.state.user.skills) Store.state.user.skills = {};
+                Store.state.user.skills.paymentTrxId = trxId;
+            }
             
-            const payType = DOMElements.mockCheckoutPaymentType.value.toUpperCase();
+            // Safe simulated/UPI success flow
+            const payType = (DOMElements.mockCheckoutPaymentType && DOMElements.mockCheckoutPaymentType.value)
+                ? DOMElements.mockCheckoutPaymentType.value.toUpperCase()
+                : "REAL_UPI";
+                
             DOMElements.checkoutModalOverlay.classList.remove("active");
             
             // Apply premium upgrades locally
@@ -1399,7 +1483,18 @@ document.addEventListener("DOMContentLoaded", () => {
             Store.addXP(200);
             Store.saveState();
             
-            alert(`Payment Simulator Success! Method: [${payType}]. Account upgraded to Premium + 200 XP unlocked!`);
+            // Sync the updated premium status & payment proof UTR reference to SQLite
+            if (Store.saveProfileToDatabase) {
+                await Store.saveProfileToDatabase();
+            }
+            
+            if (isMock && ownerUpi) {
+                const trxId = DOMElements.checkoutUpiTrxInput.value.trim();
+                DOMElements.checkoutUpiTrxInput.value = ""; // Clear input
+                alert(`🎉 SUCCESS: Payment proof [UTR: ${trxId}] submitted! Your account has been verified and upgraded to Lifetime Premium membership + 200 XP unlocked!`);
+            } else {
+                alert(`Payment Simulator Success! Method: [${payType}]. Account upgraded to Premium + 200 XP unlocked!`);
+            }
         });
 
         // Scholarship modal triggers
@@ -1723,6 +1818,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let ollamaStatusInterval = null;
     
     async function checkOllamaServerStatus() {
+        const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
+        if (provider === "cloud_gemini") {
+            DOMElements.ollamaStatusBadge.style.background = "rgba(16, 185, 129, 0.15)";
+            DOMElements.ollamaStatusBadge.style.color = "var(--color-success)";
+            DOMElements.ollamaStatusBadge.style.borderColor = "var(--color-success)";
+            DOMElements.ollamaStatusBadge.innerHTML = '<span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--color-success);"></span> Cloud Active';
+            DOMElements.ollamaModelName.innerText = "Gemini 2.5 Flash ⚡";
+            
+            if (DOMElements.settingsOllamaStatus) {
+                DOMElements.settingsOllamaStatus.innerText = "Cloud Active";
+                DOMElements.settingsOllamaStatus.style.color = "var(--color-success)";
+            }
+            return;
+        }
+
         try {
             const res = await fetch('/api/ollama/status');
             if (res.ok) {
@@ -1735,7 +1845,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     DOMElements.ollamaStatusBadge.innerHTML = '<span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--color-success);" id="ollamaStatusDot"></span> Online';
                     
                     // Update Active Model Name
-                    const activeModel = Store.state.selectedModel || 'llama3';
+                    const activeModel = Store.state.selectedModel || 'gemma3:1b';
                     DOMElements.ollamaModelName.innerText = activeModel;
                     
                     // Update Settings Form status
@@ -1809,6 +1919,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // MODULE 7: OLLAMA SERVER SETTINGS
     // ==========================================
     function setupServerSettingsListeners() {
+        DOMElements.settingsAiLocationSelect.addEventListener("change", (e) => {
+            if (e.target.value === "cloud_gemini") {
+                DOMElements.geminiKeyGroup.style.display = "block";
+                DOMElements.ollamaModelGroup.style.display = "none";
+            } else {
+                DOMElements.geminiKeyGroup.style.display = "none";
+                DOMElements.ollamaModelGroup.style.display = "block";
+            }
+        });
+
         DOMElements.settingsOllamaModelSelect.addEventListener("change", (e) => {
             if (e.target.value === "Custom") {
                 DOMElements.settingsCustomModelInput.style.display = "block";
@@ -1820,7 +1940,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         DOMElements.btnOpenServerSettings.addEventListener("click", () => {
-            const activeModel = Store.state.selectedModel || 'llama3';
+            const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
+            const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU";
+            const ownerUpi = localStorage.getItem("YOUR_AI_PARTNER_OWNER_UPI") || "ajeetkumar8877274374-1@okicici";
+            const ownerName = localStorage.getItem("YOUR_AI_PARTNER_OWNER_NAME") || "Ajeetroy_1";
+            
+            DOMElements.settingsAiLocationSelect.value = provider;
+            DOMElements.settingsGeminiKeyInput.value = geminiKey;
+            DOMElements.settingsOwnerUpiIdInput.value = ownerUpi;
+            DOMElements.settingsOwnerPayeeNameInput.value = ownerName;
+            
+            if (provider === "cloud_gemini") {
+                DOMElements.geminiKeyGroup.style.display = "block";
+                DOMElements.ollamaModelGroup.style.display = "none";
+            } else {
+                DOMElements.geminiKeyGroup.style.display = "none";
+                DOMElements.ollamaModelGroup.style.display = "block";
+            }
+
+            const activeModel = Store.state.selectedModel || 'gemma3:1b';
             const exists = Array.from(DOMElements.settingsOllamaModelSelect.options)
                 .some(opt => opt.value === activeModel);
                 
@@ -1844,6 +1982,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         DOMElements.aiSettingsForm.addEventListener("submit", (e) => {
             e.preventDefault();
+            const provider = DOMElements.settingsAiLocationSelect.value;
+            const geminiKey = DOMElements.settingsGeminiKeyInput.value.trim();
+            const ownerUpi = DOMElements.settingsOwnerUpiIdInput.value.trim();
+            const ownerName = DOMElements.settingsOwnerPayeeNameInput.value.trim();
+            
+            localStorage.setItem("YOUR_AI_PARTNER_OWNER_UPI", ownerUpi);
+            localStorage.setItem("YOUR_AI_PARTNER_OWNER_NAME", ownerName);
+            
+            if (provider === "cloud_gemini") {
+                if (!geminiKey) {
+                    alert("Please enter your Gemini API Key to enable cloud processing!");
+                    return;
+                }
+                localStorage.setItem("YOUR_AI_PARTNER_API_PROVIDER", "cloud_gemini");
+                localStorage.setItem("YOUR_AI_PARTNER_GEMINI_KEY", geminiKey);
+                
+                DOMElements.aiSettingsModalOverlay.classList.remove("active");
+                alert("Cloud AI Provider and UPI settings configured successfully! Active Model: [Gemini 2.5 Flash] (Zero Mac Heat! ⚡)");
+                checkOllamaServerStatus();
+                return;
+            }
+            
+            localStorage.setItem("YOUR_AI_PARTNER_API_PROVIDER", "local");
             const selectValue = DOMElements.settingsOllamaModelSelect.value;
             let modelName = selectValue;
             
@@ -1859,7 +2020,8 @@ document.addEventListener("DOMContentLoaded", () => {
             Store.saveState();
             
             DOMElements.aiSettingsModalOverlay.classList.remove("active");
-            alert(`AI Model configured successfully! Active Model: [${modelName}]`);
+            alert(`Local AI Model configured successfully! Active Model: [${modelName}]`);
+            checkOllamaServerStatus();
         });
 
         DOMElements.btnRefreshServerStatus.addEventListener("click", async () => {

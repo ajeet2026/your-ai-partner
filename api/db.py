@@ -12,9 +12,13 @@ def get_connection():
             print("⚠️ psycopg2 not installed. Falling back to local SQLite.")
             
     # Local SQLite Fallback
-    api_dir = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.dirname(api_dir)
-    db_path = os.path.join(root_dir, "your_ai_partner.db")
+    if os.environ.get("VERCEL"):
+        # On Vercel, if no PostgreSQL is configured, fall back to /tmp so the filesystem is writeable
+        db_path = "/tmp/your_ai_partner.db"
+    else:
+        api_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(api_dir)
+        db_path = os.path.join(root_dir, "your_ai_partner.db")
     return sqlite3.connect(db_path)
 
 def init_db():

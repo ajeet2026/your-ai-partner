@@ -20,6 +20,9 @@
     
     <!-- Stripe.js for Production Payments -->
     <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Marked.js for AI Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -247,6 +250,9 @@
                     </button>
                     <button class="btn btn-outline" id="btnSignOut" style="padding: 2px 6px; font-size: 9px; height: auto; border-color: rgba(244,63,94,0.3); color: var(--color-danger); display: none;" title="Sign Out">
                         <i class="fa-solid fa-power-off"></i> Out
+                    </button>
+                    <button class="btn btn-outline" id="btnResetApp" style="padding: 2px 6px; font-size: 9px; height: auto; border-color: rgba(255,255,255,0.1); color: var(--text-muted);" title="Reset Profile">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
                     </button>
                 </div>
             </div>
@@ -750,32 +756,59 @@
                             <h3 class="panel-title">Subscription Tier</h3>
                         </div>
                         
-                        <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: rgba(0, 242, 254, 0.03); border-radius: 12px; border: 1px solid rgba(0, 242, 254, 0.15);">
-                            <span class="badge badge-cyan" style="margin-bottom: 10px;">Free Trial Active</span>
-                            <div style="font-size: 32px; font-weight: 800;">₹49 <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">/ Month</span></div>
-                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Includes full adaptivity, continuous mood analysis, and custom roadmaps.</p>
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; font-size: 13px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>All AI Tutor explanations & modes</span>
+                        <!-- Pricing Details (Visible when NOT premium) -->
+                        <div id="pricingTierContainer">
+                            <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: rgba(0, 242, 254, 0.03); border-radius: 12px; border: 1px solid rgba(0, 242, 254, 0.15);">
+                                <span class="badge badge-cyan" style="margin-bottom: 10px;">Free Trial Active</span>
+                                <div style="font-size: 32px; font-weight: 800;">₹49 <span style="font-size: 14px; font-weight: 400; color: var(--text-muted);">/ Month</span></div>
+                                <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Includes full adaptivity, continuous mood analysis, and custom roadmaps.</p>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>Unlimited diagnostic tests & analytics</span>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; font-size: 13px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>All AI Tutor explanations & modes</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>Unlimited diagnostic tests & analytics</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>Full Spaced Repetition study planners</span>
+                                </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> <span>Full Spaced Repetition study planners</span>
+
+                            <button class="btn btn-primary" style="width: 100%;" id="btnTriggerMockCheckout">
+                                Upgrade to Premium Series <i class="fa-solid fa-credit-card"></i>
+                            </button>
+                            
+                            <div style="text-align: center; margin-top: 15px;">
+                                <a href="#" style="font-size: 12px; color: var(--color-secondary); font-weight: 700; text-decoration: none;" id="btnTriggerScholarshipModal">
+                                    Apply for Special Need Scholarship?
+                                </a>
                             </div>
                         </div>
 
-                        <button class="btn btn-primary" style="width: 100%;" id="btnTriggerMockCheckout">
-                            Upgrade to Premium Series <i class="fa-solid fa-credit-card"></i>
-                        </button>
-                        
-                        <div style="text-align: center; margin-top: 15px;">
-                            <a href="#" style="font-size: 12px; color: var(--color-secondary); font-weight: 700; text-decoration: none;" id="btnTriggerScholarshipModal">
-                                Apply for Special Need Scholarship?
-                            </a>
+                        <!-- Active Premium Dashboard (Visible when IS premium) -->
+                        <div id="premiumActiveContainer" style="display: none; text-align: center;">
+                            <div style="padding: 25px 20px; background: linear-gradient(135deg, rgba(234, 179, 8, 0.1), rgba(244, 63, 94, 0.1)); border-radius: 12px; border: 1.5px solid #eab308; box-shadow: 0 0 15px rgba(234, 179, 8, 0.1); margin-bottom: 20px;">
+                                <span class="badge badge-warning" style="margin-bottom: 12px; background: rgba(234, 179, 8, 0.2); color: #eab308; border-color: #eab308; font-weight:700;"><i class="fa-solid fa-crown"></i> PREMIUM ACTIVE</span>
+                                <div style="font-size: 26px; font-weight: 800; color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.2);">Lifetime Membership</div>
+                                <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px; line-height: 1.5;">Thank you for supporting Your AI Partner! You have unlimited, ad-free access to all advanced tutoring models, diagnostic evaluations, analytics, planners, and custom career plans.</p>
+                            </div>
+                            
+                            <div style="background: rgba(255,255,255,0.03); border-radius:12px; padding:15px; text-align:left; font-size:12px; line-height:1.6; border:1px solid rgba(255,255,255,0.05);">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px; margin-bottom:6px;">
+                                    <span>Status:</span>
+                                    <strong style="color:var(--color-success);">Active (Verified)</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px; margin-bottom:6px;">
+                                    <span>AI Tutor Daily Usage:</span>
+                                    <strong style="color:var(--color-success);">Infinite ♾️</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between;">
+                                    <span>Badge Unlocked:</span>
+                                    <strong style="color:#eab308;"><i class="fa-solid fa-gem"></i> Elite Thinker</strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -835,18 +868,41 @@
 
             <div id="stripeMockOption" style="background: rgba(244,63,94,0.06); border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 25px; border: 1px dashed rgba(244,63,94,0.3);">
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
-                    <span style="color: var(--color-danger); font-weight: 700;">Development Simulated Gateway</span>
+                    <span style="color: var(--color-danger); font-weight: 700;" id="checkoutMockTitle">Development Simulated Gateway</span>
                     <strong>₹49.00</strong>
                 </div>
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
-                    Stripe secret keys are not configured in your environment. You can bypass the transaction and simulate a successful payment instantly.
-                </p>
-                <div class="input-group" style="margin-bottom:0;">
-                    <label class="input-label">Select Mock Method</label>
-                    <select id="mockCheckoutPaymentType" class="input-field" style="padding: 10px 14px;">
-                        <option value="sim_stripe">Simulated Stripe Card</option>
-                        <option value="sim_upi">Simulated GPay / UPI</option>
-                    </select>
+                
+                <!-- Simulated flow description -->
+                <div id="checkoutSimulatedDescContainer">
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+                        Stripe secret keys are not configured in your environment. You can bypass the transaction and simulate a successful payment instantly.
+                    </p>
+                    <div class="input-group" style="margin-bottom:0;">
+                        <label class="input-label">Select Mock Method</label>
+                        <select id="mockCheckoutPaymentType" class="input-field" style="padding: 10px 14px;">
+                            <option value="sim_stripe">Simulated Stripe Card</option>
+                            <option value="sim_upi">Simulated GPay / UPI</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Real UPI Scan & Pay QR Code Container (Visible when Owner UPI ID is set) -->
+                <div id="checkoutRealUpiContainer" style="display: none; text-align: center; margin-top: 10px; margin-bottom: 10px;">
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; text-align: left; line-height: 1.4;">
+                        Scan the secure dynamically generated UPI QR code below using any UPI app (GPay, PhonePe, Paytm, BHIM) to make a payment of **₹49.00** directly to the owner.
+                    </p>
+                    <div style="background: white; padding: 12px; display: inline-block; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 12px;">
+                        <img id="checkoutUpiQrImage" src="" alt="UPI Scan to Pay QR Code" style="width: 170px; height: 170px; display: block; margin: 0 auto;">
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.5;">
+                        <div>Payee Name: <strong id="checkoutUpiPayeeName" style="color: white; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;">Ajeetroy_1</strong></div>
+                        <div style="margin-top: 4px;">UPI ID: <strong id="checkoutUpiId" style="color: var(--color-primary);">ajeetkumar8877274374-1@okicici</strong></div>
+                    </div>
+                    
+                    <div class="input-group" style="text-align: left; margin-bottom: 0;">
+                        <label class="input-label" style="color: #eab308; font-weight:700;"><i class="fa-solid fa-list-ol"></i> Transaction Ref No. / UTR (12-digit)</label>
+                        <input type="text" id="checkoutUpiTrxInput" class="input-field" placeholder="Enter 12-digit UPI transaction reference number..." style="padding: 10px 14px;" maxlength="12">
+                    </div>
                 </div>
             </div>
 
@@ -1015,7 +1071,24 @@
             </p>
             
             <form id="aiSettingsForm">
+                <!-- AI Provider Selection (Local Ollama vs. Cloud Gemini) -->
                 <div class="input-group">
+                    <label class="input-label">AI Processing Provider</label>
+                    <select id="settingsAiLocationSelect" class="input-field" style="padding: 10px 14px; margin-bottom: 10px;">
+                        <option value="local">Local Ollama Server (Mac CPU)</option>
+                        <option value="cloud_gemini">Google Gemini Cloud API (Zero Mac Heat! ⚡)</option>
+                    </select>
+                </div>
+
+                <!-- Gemini API Key input group (Visible when Cloud Gemini is active) -->
+                <div class="input-group" id="geminiKeyGroup" style="display: none;">
+                    <label class="input-label">Gemini API Key</label>
+                    <input type="password" id="settingsGeminiKeyInput" class="input-field" placeholder="Enter your Gemini API Key..." style="padding: 10px 14px; margin-bottom: 5px;">
+                    <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px; line-height: 1.4;">Don't have a key? Get a free key in 10 seconds at <a href="https://aistudio.google.com/" target="_blank" style="color: var(--color-secondary); font-weight:700; text-decoration: underline;">Google AI Studio</a>.</p>
+                </div>
+
+                <!-- Local Ollama Model Selection group (Visible when Local Ollama is active) -->
+                <div class="input-group" id="ollamaModelGroup">
                     <label class="input-label">Ollama Model Selection</label>
                     <select id="settingsOllamaModelSelect" class="input-field" style="padding: 10px 14px; margin-bottom: 10px;">
                         <option value="llama3">llama3 (Default)</option>
@@ -1026,6 +1099,16 @@
                     </select>
                     
                     <input type="text" id="settingsCustomModelInput" class="input-field" placeholder="Enter custom model name (e.g. llama3:8b)..." style="display: none; padding: 10px 14px;">
+                </div>
+                
+                <!-- Owner UPI ID Configuration for Student Upgrades -->
+                <div class="input-group" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                    <label class="input-label" style="color: #eab308; font-weight:700;"><i class="fa-solid fa-qrcode"></i> UPI ID (For Upgrades Payment)</label>
+                    <input type="text" id="settingsOwnerUpiIdInput" class="input-field" placeholder="Enter your UPI ID (e.g. name@okicici)..." style="padding: 10px 14px; margin-bottom: 10px;">
+                    
+                    <label class="input-label" style="color: #eab308; font-weight:700;">Payee Full Name</label>
+                    <input type="text" id="settingsOwnerPayeeNameInput" class="input-field" placeholder="Enter business/payee full name..." style="padding: 10px 14px;">
+                    <p style="font-size: 10px; color: var(--text-muted); margin-top: 5px; line-height: 1.4;">When filled, upgrading students scan a real GPay/UPI dynamic QR code pointing to your UPI ID so you receive their ₹49 payment directly! (Leave blank to use simulation only).</p>
                 </div>
                 
                 <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; font-size: 11px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
