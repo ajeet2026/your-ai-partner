@@ -855,6 +855,19 @@ document.addEventListener("DOMContentLoaded", () => {
             if (e.key === "Enter") handleSendChat();
         });
 
+        // Toggle custom subject input field
+        DOMElements.chatSubjectSelect.addEventListener("change", () => {
+            const customInput = document.getElementById("chatCustomSubjectInput");
+            if (DOMElements.chatSubjectSelect.value === "custom") {
+                if (customInput) {
+                    customInput.style.display = "block";
+                    customInput.focus();
+                }
+            } else {
+                if (customInput) customInput.style.display = "none";
+            }
+        });
+
         DOMElements.btnClearChatHistory.addEventListener("click", () => {
             if (confirm("Clear your chat logs with the AI Tutor?")) {
                 Store.clearChat();
@@ -1013,7 +1026,11 @@ document.addEventListener("DOMContentLoaded", () => {
         box.appendChild(typingDiv);
         box.scrollTop = box.scrollHeight;
 
-        const subject = DOMElements.chatSubjectSelect.value;
+        let subject = DOMElements.chatSubjectSelect.value;
+        if (subject === "custom") {
+            const customInput = document.getElementById("chatCustomSubjectInput");
+            subject = (customInput && customInput.value.trim()) ? customInput.value.trim() : "General";
+        }
         const level = DOMElements.chatLevelSelect.value;
         const lang = DOMElements.chatLangSelect.value;
         
