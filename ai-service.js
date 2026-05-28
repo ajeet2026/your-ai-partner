@@ -217,7 +217,8 @@ class AIService {
 
     async getTutorResponse(question, subject = 'general', level = 'intermediate', language = 'English') {
         const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
-        const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU";
+        let geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU";
+        geminiKey = geminiKey.trim();
         
         if (provider === "cloud_gemini" && geminiKey) {
             try {
@@ -262,6 +263,21 @@ Always structure your answers beautifully with markdown, explain core concepts w
                 } else {
                     const err = await res.json();
                     console.error("Gemini API Error: ", err);
+                    
+                    if (err.error && err.error.message) {
+                        if (err.error.message.includes("leaked") || err.error.status === "PERMISSION_DENIED" || err.error.code === 403) {
+                            return `⚠️ **Google Gemini Cloud Authentication Failed**
+
+Your API key was blocked or reported as leaked because it was shared publicly. 
+
+**How to Fix This in 30 Seconds:**
+1. Go to **[Google AI Studio](https://aistudio.google.com/)** and create a free new Gemini API Key.
+2. Open your App **Settings** (click the gear icon ⚙️ inside the "AI Server" widget on the top left of your sidebar).
+3. Paste your new API Key in the **Gemini API Key** field, click **Save Configurations**, and close the settings!
+4. The AI Tutor will instantly start giving you real cloud responses again!`;
+                        }
+                        return `⚠️ **Google Gemini API Error:** ${err.error.message}\n\nPlease check your key or network connection in your settings.`;
+                    }
                 }
             } catch (e) {
                 console.error("Gemini request failed, running simulated fallback:", e);
