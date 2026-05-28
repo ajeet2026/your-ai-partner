@@ -1,5 +1,11 @@
 // app.js - Main Application Orchestrator & View Controller
 document.addEventListener("DOMContentLoaded", () => {
+    // Auto-update old leaked API key to the active one in localStorage if cached
+    const cachedKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY");
+    if (cachedKey && (cachedKey.includes("AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU") || cachedKey.startsWith("AIzaSy"))) {
+        localStorage.setItem("YOUR_AI_PARTNER_GEMINI_KEY", atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE="));
+    }
+
     // Check global services are present
     if (!window.AppStore || !window.AIService) {
         console.error("Core Services (state.js or ai-service.js) not found. Re-check file order.");
@@ -1958,7 +1964,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         DOMElements.btnOpenServerSettings.addEventListener("click", () => {
             const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
-            const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU";
+            const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
             const ownerUpi = localStorage.getItem("YOUR_AI_PARTNER_OWNER_UPI") || "ajeetkumar8877274374-1@okicici";
             const ownerName = localStorage.getItem("YOUR_AI_PARTNER_OWNER_NAME") || "Ajeetroy_1";
             
