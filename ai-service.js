@@ -215,7 +215,7 @@ class AIService {
         return mainResponse;
     }
 
-    async getTutorResponse(question, subject = 'general', level = 'intermediate', language = 'English') {
+    async getTutorResponse(question, subject = 'general', level = 'intermediate', language = 'English', imageObj = null) {
         const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
         let geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
         geminiKey = geminiKey.trim();
@@ -234,9 +234,19 @@ Always structure your answers beautifully with markdown, explain core concepts w
                         parts: [{ text: m.text }]
                     }));
                 
+                const userParts = [{ text: question }];
+                if (imageObj && imageObj.base64 && imageObj.mimeType) {
+                    userParts.push({
+                        inlineData: {
+                            mimeType: imageObj.mimeType,
+                            data: imageObj.base64
+                        }
+                    });
+                }
+
                 recentHistory.push({
                     role: 'user',
-                    parts: [{ text: question }]
+                    parts: userParts
                 });
 
                 const payload = {
@@ -813,6 +823,88 @@ Ensure the response contains valid JSON structure only.`;
                 }
             ];
         }
+    }
+
+    async getRevisionFlashcards(subject) {
+        const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
+        const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
+        
+        if (provider === "cloud_gemini" && geminiKey) {
+            try {
+                const prompt = `Generate exactly 6 premium study flashcards for quick revision on the subject '${subject}'.
+The output MUST be a JSON array of exactly 6 objects. Do not wrap in markdown or add explanations outside the JSON structure.
+
+Each flashcard object in the array must have exactly these keys:
+1. "topic": A very short header/topic name (e.g. "Newton's Second Law", "Quadratic Formula").
+2. "question": The question or definition front side of the card (e.g. "What is the formula and definition of force?").
+3. "answer": The answer, explanation, or key takeaways back side of the card. Keep it highly informative but concise (under 250 characters).
+
+Ensure the response contains valid JSON structure only.`;
+
+                const payload = {
+                    contents: [
+                        { role: 'user', parts: [{ text: prompt }] }
+                    ],
+                    generationConfig: {
+                        responseMimeType: 'application/json',
+                        temperature: 0.5
+                    }
+                };
+
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                        const reply = data.candidates[0].content.parts[0].text;
+                        return JSON.parse(reply.trim());
+                    }
+                }
+            } catch (e) {
+                console.warn("Gemini Flashcards request failed, returning fallback deck:", e);
+            }
+        }
+
+        return this.getMockFlashcards(subject);
+    }
+
+    getMockFlashcards(subject) {
+        return [
+            {
+                "topic": `${subject} - Concept 1`,
+                "question": `What is the primary fundamental principle of ${subject}?`,
+                "answer": `This represents the core foundation of the field, outlining how elements interact under standard baseline criteria.`
+            },
+            {
+                "topic": `${subject} - Key Formula`,
+                "question": `What is the most widely utilized equation in ${subject}?`,
+                "answer": `The primary governing equation is mathematically represented to calculate rates of change, state differences, or force vectors.`
+            },
+            {
+                "topic": `${subject} - Standard Theory`,
+                "question": `State the primary conservation law associated with ${subject}.`,
+                "answer": `Energy, mass, or states remain perfectly constant in an isolated system, changing forms but never being created or destroyed.`
+            },
+            {
+                "topic": `${subject} - Core Mechanism`,
+                "question": `How do components interact in standard ${subject} settings?`,
+                "answer": `Interactions occur via energy thresholds and force fields, shifting particles or data vectors into lower energy ground states.`
+            },
+            {
+                "topic": `${subject} - Practical Application`,
+                "question": `Where is ${subject} most prominently applied in modern industry?`,
+                "answer": `Used extensively to optimize thermal efficiency, computational processing layouts, and mechanical load balances in engineering.`
+            },
+            {
+                "topic": `${subject} - Critical Variable`,
+                "question": `What parameter is most sensitive to changes in ${subject}?`,
+                "answer": `Temperature, mass flow, or dimension sizes drastically alter outcome efficiency indices, requiring strict calibration controls.`
+            }
+        ];
     }
 }
 

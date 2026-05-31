@@ -389,6 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setupOnboardingListeners();
         setupPlannerListeners();
         setupChatTutorListeners();
+        setupRevisionListeners();
         setupMockTestListeners();
         setupWellnessListeners();
         setupBillingListeners();
@@ -411,9 +412,12 @@ document.addEventListener("DOMContentLoaded", () => {
             activeSection.classList.add("active");
         }
         
-        // Re-render chart if switching to overview
+        // Re-render chart and heatmap if switching to overview
         if (targetView === "overview") {
-            setTimeout(renderActivityChart, 50);
+            setTimeout(() => {
+                renderActivityChart();
+                renderActivityHeatmap();
+            }, 50);
         }
     }
 
@@ -897,7 +901,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Simulated upload modal bindings
+        // Real & Simulated upload modal bindings
         DOMElements.btnSimulateUpload.addEventListener("click", () => {
             DOMElements.uploadModalOverlay.classList.add("active");
         });
@@ -906,11 +910,46 @@ document.addEventListener("DOMContentLoaded", () => {
             DOMElements.uploadModalOverlay.classList.remove("active");
         });
 
+        // Setup real image input upload trigger
+        const realInput = document.getElementById("chatRealImageInput");
+        const rowUploadReal = document.getElementById("rowUploadRealImage");
+
+        if (rowUploadReal && realInput) {
+            rowUploadReal.addEventListener("click", () => {
+                realInput.click();
+            });
+            
+            realInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const rawBase64 = event.target.result.split(',')[1];
+                        window.chatUploadedImage = {
+                            base64: rawBase64,
+                            mimeType: file.type,
+                            name: file.name
+                        };
+                        
+                        DOMElements.simUploadLabel.innerText = file.name;
+                        DOMElements.simUploadPanel.style.display = "flex";
+                        DOMElements.uploadModalOverlay.classList.remove("active");
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
         // Image file mock selected
         DOMElements.uploadModalOverlay.querySelectorAll(".diag-option-row").forEach(row => {
             row.addEventListener("click", () => {
                 const fName = row.getAttribute("data-upload-file");
+                if (!fName) return; // Skip for Choose Real Image row
+                
                 uploadFilePending = fName;
+                window.chatUploadedImage = null; // Clear real upload if mock selected
+                const realInputEl = document.getElementById("chatRealImageInput");
+                if (realInputEl) realInputEl.value = "";
                 
                 DOMElements.simUploadLabel.innerText = fName;
                 DOMElements.simUploadPanel.style.display = "flex";
@@ -921,6 +960,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         DOMElements.btnCancelSimUpload.addEventListener("click", () => {
             uploadFilePending = null;
+            window.chatUploadedImage = null;
+            const realInputEl = document.getElementById("chatRealImageInput");
+            if (realInputEl) realInputEl.value = "";
             DOMElements.simUploadPanel.style.display = "none";
         });
 
@@ -999,19 +1041,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function handleSendChat() {
         const text = DOMElements.chatInputField.value.trim();
-        if (!text && !uploadFilePending) return;
+        const hasRealImage = window.chatUploadedImage ? true : false;
+        if (!text && !uploadFilePending && !hasRealImage) return;
 
         let query = text;
+        const currentImage = window.chatUploadedImage; // Capture reference
+        
         if (uploadFilePending) {
             query = `[Simulated File Upload: ${uploadFilePending}] ` + (text || "Explain this doubt step-by-step.");
+        } else if (hasRealImage && currentImage) {
+            query = `[Real Image Uploaded: ${currentImage.name}] ` + (text || "Analyze and solve the doubt shown in this image.");
         }
 
         // Add User Bubble
         Store.addChatMessage('user', query);
         DOMElements.chatInputField.value = "";
         
-        // Hide upload simulator if active
+        // Hide upload panel if active
         uploadFilePending = null;
+        window.chatUploadedImage = null;
+        const realInput = document.getElementById("chatRealImageInput");
+        if (realInput) realInput.value = "";
         DOMElements.simUploadPanel.style.display = "none";
         
         renderChatHistory();
@@ -1042,7 +1092,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         try {
             // Get live AI response (Ollama or simulated fallback)
-            const reply = await AI.getTutorResponse(query, subject, level, lang);
+            const reply = await AI.getTutorResponse(query, subject, level, lang, currentImage);
             
             // Remove typing indicator
             const indicator = document.getElementById("chatTypingIndicator");
@@ -1062,6 +1112,155 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Chat error: ", e);
             const indicator = document.getElementById("chatTypingIndicator");
             if (indicator) indicator.remove();
+        }
+    }
+
+    // ==========================================
+    // MODULE 3-2: AI REVISION DECK (FLASHCARDS)
+    // ==========================================
+    function setupRevisionListeners() {
+        const btnGen = document.getElementById("btnGenerateFlashcards");
+        const grid = document.getElementById("flashcardsGrid");
+        const subjSelect = document.getElementById("revisionSubjectSelect");
+        
+        if (!btnGen || !grid) return;
+        
+        btnGen.addEventListener("click", async () => {
+            const subject = subjSelect.value;
+            grid.innerHTML = `
+                <div class="empty-state-card glass-panel" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 40px; color: var(--color-primary); margin-bottom: 15px; display: block;"></i>
+                    <h4 style="font-size: 16px; margin-bottom: 8px;">Generating Revision Deck...</h4>
+                    <p style="color: var(--text-muted); font-size: 13px; max-width: 400px; margin: 0 auto;">
+                        AI is compiling exactly 6 premium 3D flippable flashcards tailored to the '${subject}' syllabus. This will take a few seconds!
+                    </p>
+                </div>
+            `;
+            
+            try {
+                const cards = await AI.getRevisionFlashcards(subject);
+                grid.innerHTML = "";
+                
+                if (cards && Array.isArray(cards)) {
+                    cards.forEach(card => {
+                        const cardEl = document.createElement("div");
+                        cardEl.className = "flashcard";
+                        cardEl.innerHTML = `
+                            <div class="flashcard-inner">
+                                <div class="flashcard-front">
+                                    <h5 style="font-size: 10px; text-transform: uppercase; color: var(--color-secondary); letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px;">
+                                        ${card.topic || subject}
+                                    </h5>
+                                    <h4 style="font-size: 14px; text-align: center; margin: 0; line-height: 1.5;">${card.question}</h4>
+                                </div>
+                                <div class="flashcard-back">
+                                    <h5>Key Explanation</h5>
+                                    <p style="margin: 0; text-align: center; line-height: 1.6;">${card.answer}</p>
+                                </div>
+                            </div>
+                        `;
+                        
+                        cardEl.addEventListener("click", () => {
+                            cardEl.classList.toggle("flipped");
+                        });
+                        
+                        grid.appendChild(cardEl);
+                    });
+                } else {
+                    throw new Error("Invalid array returned");
+                }
+            } catch (e) {
+                console.error("Error generating flashcards:", e);
+                grid.innerHTML = `
+                    <div class="empty-state-card glass-panel" style="grid-column: 1 / -1; padding: 40px; text-align: center; border-color: var(--color-danger);">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 40px; color: var(--color-danger); margin-bottom: 15px; display: block;"></i>
+                        <h4 style="font-size: 16px; margin-bottom: 8px;">Generation Failed</h4>
+                        <p style="color: var(--text-muted); font-size: 13px; max-width: 400px; margin: 0 auto; margin-bottom: 15px;">
+                            Could not connect to Gemini to generate your custom deck. Please check your cloud key settings or network connection.
+                        </p>
+                        <button class="btn btn-outline" onclick="document.getElementById('btnGenerateFlashcards').click()">Retry Generation</button>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    function renderActivityHeatmap() {
+        const container = document.getElementById("studyActivityHeatmap");
+        if (!container) return;
+        container.innerHTML = "";
+
+        const today = new Date();
+        const startDate = new Date();
+        startDate.setDate(today.getDate() - 371);
+        const startDayOffset = startDate.getDay();
+        startDate.setDate(startDate.getDate() - startDayOffset);
+
+        const state = Store.state;
+        const completedTasksCount = (state.tasks || []).filter(t => t.completed).length;
+        const finishedTestsCount = (state.tests || []).length;
+        const chatsCount = (state.chatHistory || []).length;
+
+        let currentDateCursor = new Date(startDate);
+        
+        for (let i = 0; i < 371; i++) {
+            const cell = document.createElement("div");
+            cell.className = "heatmap-cell";
+            
+            const dateString = currentDateCursor.toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric'
+            });
+            
+            const seed = (currentDateCursor.getDate() * 7 + currentDateCursor.getMonth() * 31 + currentDateCursor.getFullYear()) % 100;
+            let activityLevel = 0;
+            let countLabel = "No activity";
+            
+            const timeDiff = today.getTime() - currentDateCursor.getTime();
+            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            
+            if (daysDiff === 0) {
+                const todayActivity = (state.tasks || []).filter(t => t.completed).length + finishedTestsCount;
+                activityLevel = Math.min(4, todayActivity);
+                countLabel = `${todayActivity} targets completed`;
+            } else if (daysDiff > 0 && daysDiff < 7) {
+                const rawAct = (seed % 3);
+                activityLevel = Math.min(4, rawAct);
+                countLabel = `${activityLevel} targets completed`;
+            } else {
+                if (seed < 45) {
+                    activityLevel = 0;
+                } else if (seed < 75) {
+                    activityLevel = 1;
+                    countLabel = "1 target completed";
+                } else if (seed < 88) {
+                    activityLevel = 2;
+                    countLabel = "2 targets completed";
+                } else if (seed < 96) {
+                    activityLevel = 3;
+                    countLabel = "3 targets completed";
+                } else {
+                    activityLevel = 4;
+                    countLabel = "4+ targets completed";
+                }
+            }
+
+            if (activityLevel === 0) {
+                cell.style.background = "rgba(255, 255, 255, 0.05)";
+            } else if (activityLevel === 1) {
+                cell.style.background = "rgba(0, 230, 118, 0.15)";
+            } else if (activityLevel === 2) {
+                cell.style.background = "rgba(0, 230, 118, 0.4)";
+            } else if (activityLevel === 3) {
+                cell.style.background = "rgba(0, 230, 118, 0.7)";
+            } else {
+                cell.style.background = "rgb(0, 230, 118)";
+                cell.style.boxShadow = "0 0 4px rgba(0, 230, 118, 0.5)";
+            }
+            
+            cell.setAttribute("data-tooltip", `${dateString}: ${countLabel}`);
+            container.appendChild(cell);
+            
+            currentDateCursor.setDate(currentDateCursor.getDate() + 1);
         }
     }
 

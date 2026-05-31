@@ -225,6 +225,9 @@
                 <div class="nav-item" data-view="tutor">
                     <i class="fa-solid fa-graduation-cap"></i> AI Learning Tutor
                 </div>
+                <div class="nav-item" data-view="revision">
+                    <i class="fa-solid fa-clone"></i> AI Revision Deck
+                </div>
                 <div class="nav-item" data-view="mocktest">
                     <i class="fa-solid fa-circle-check"></i> Mock Test Center
                 </div>
@@ -325,6 +328,29 @@
                         </div>
                         <div class="badge-gallery" id="unlockedBadgesGallery">
                             <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Activity Heatmap Card -->
+                <div class="glass-panel" style="padding: 24px; margin-top: 24px;">
+                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h3 class="panel-title"><i class="fa-solid fa-square-poll-vertical" style="color: var(--color-success); margin-right: 6px;"></i> Interactive Student Activity Heatmap</h3>
+                        <div style="display: flex; gap: 12px; font-size: 11px; align-items: center; color: var(--text-muted);">
+                            <span>Less</span>
+                            <div style="width: 10px; height: 10px; background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(255,255,255,0.06); border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 10px; background: rgba(0, 230, 118, 0.35); border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 10px; background: rgba(0, 230, 118, 0.65); border-radius: 2px;"></div>
+                            <div style="width: 10px; height: 10px; background: rgb(0, 230, 118); border-radius: 2px;"></div>
+                            <span>More</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
+                        Visual representation of tasks, mock exams, and doubt sessions completed. Keep your daily streak green!
+                    </p>
+                    <div style="overflow-x: auto; padding-bottom: 5px;">
+                        <div id="studyActivityHeatmap" class="heatmap-grid" style="display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 12px); gap: 4px; min-width: 730px;">
+                            <!-- Populated dynamically via JS -->
                         </div>
                     </div>
                 </div>
@@ -499,6 +525,53 @@
                         <button class="btn btn-primary" id="btnSendChatMessage">
                             <i class="fa-solid fa-paper-plane"></i>
                         </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW C-2: AI REVISION DECK -->
+            <!-- ========================================== -->
+            <section id="view-revision" class="view-section">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">AI Revision Deck</h1>
+                        <p class="page-subtitle">Generate interactive, flippable 3D study cards to review core definitions and equations.</p>
+                    </div>
+                </div>
+
+                <div class="revision-container">
+                    <div class="glass-panel" style="padding: 24px; margin-bottom: 25px;">
+                        <h3 style="margin-bottom: 12px; font-size: 20px;">AI Flashcard Generator</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">
+                            Select a subject and click "Generate AI Flashcards" to create 6 highly focused, flippable revision cards containing questions, concepts, and answers.
+                        </p>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                            <div class="input-group" style="max-width: 250px; margin-bottom: 0;">
+                                <select id="revisionSubjectSelect" class="input-field">
+                                    <option value="Physics">Physics Revision</option>
+                                    <option value="Mathematics">Mathematics Algebra</option>
+                                    <option value="Chemistry">Chemistry Atoms</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="General Biology">General Biology</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="btnGenerateFlashcards">
+                                Generate Flashcards <i class="fa-solid fa-wand-magic-sparkles" style="margin-left: 6px;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Flashcards Grid -->
+                    <div id="flashcardsGrid" class="flashcards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px 0;">
+                        <!-- Fallback empty state -->
+                        <div class="empty-state-card glass-panel" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
+                            <i class="fa-solid fa-clone" style="font-size: 40px; color: var(--color-primary); margin-bottom: 15px; display: block;"></i>
+                            <h4 style="font-size: 16px; margin-bottom: 8px;">No Flashcards Loaded</h4>
+                            <p style="color: var(--text-muted); font-size: 13px; max-width: 400px; margin: 0 auto;">
+                                Choose a subject above and generate your dynamic AI study deck to begin your fast revision session!
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -946,15 +1019,26 @@
         </div>
     </div>
 
+    <!-- Real File Input Hidden element -->
+    <input type="file" id="chatRealImageInput" accept="image/jpeg, image/png, image/webp" style="display: none;">
+
     <!-- C. Simulated Image Upload Selection Modal -->
     <div class="modal-overlay" id="uploadModalOverlay">
         <div class="modal-box glass-panel text-center">
             <h3 style="margin-bottom: 10px; font-size: 20px;"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--color-primary); margin-right: 6px;"></i> Simulated Notebook / Doubt Upload</h3>
             <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">
-                Select a simulated image below to upload it directly to the Doubt Solver.
+                Select a simulated image below to upload it, or choose a real image from your computer.
             </p>
             
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
+                <!-- Real File Input Row -->
+                <div class="diag-option-row" id="rowUploadRealImage" style="text-align: left; border: 2px dashed var(--color-primary); background: rgba(0, 242, 254, 0.05);">
+                    <i class="fa-solid fa-file-arrow-up" style="font-size: 20px; color: var(--color-primary);"></i>
+                    <div style="flex-grow: 1;">
+                        <strong style="font-size: 13px; display: block; color: var(--color-primary);">📁 Choose Real Local Image...</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);">Upload any JPEG, PNG, or WebP image from your computer</span>
+                    </div>
+                </div>
                 <div class="diag-option-row" data-upload-file="trig_identities.png" style="text-align: left;">
                     <i class="fa-solid fa-file-image" style="font-size: 20px; color: var(--color-primary);"></i>
                     <div style="flex-grow: 1;">
