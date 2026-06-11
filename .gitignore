@@ -17,3 +17,8 @@ Thumbs.db
 
 # Ignore environment variables
 .env
+
+# Ignore node dependencies and binaries
+node_modules/
+node_bin/
+
