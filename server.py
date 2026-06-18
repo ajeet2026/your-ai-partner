@@ -6,7 +6,6 @@ import json
 import urllib.request
 import urllib.parse
 import urllib.error
-import base64
 from datetime import datetime, timedelta
 
 # Try installing standard dependencies if running for the first time
@@ -411,15 +410,12 @@ async def generate_gemini(request: Request):
             api_key = custom_key.strip()
         else:
             api_key = os.environ.get("GEMINI_API_KEY")
-            if not api_key:
-                try:
-                    # Decrypt/decode the fallback key to avoid Git alarm detectors
-                    api_key = base64.b64decode("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=").decode("utf-8")
-                except Exception:
-                    pass
         
         if not api_key:
-            raise HTTPException(status_code=400, detail="Gemini API Key is not configured.")
+            raise HTTPException(
+                status_code=400, 
+                detail="Gemini API Key is not configured on the server. Please set the GEMINI_API_KEY environment variable or provide your own key in settings."
+            )
             
         # Read body
         body = await request.json()

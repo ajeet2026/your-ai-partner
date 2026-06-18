@@ -10,7 +10,6 @@ import urllib.parse
 import urllib.error
 import hmac
 import hashlib
-import base64
 
 PORT = 8000
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -234,14 +233,9 @@ Ensure the response contains valid JSON structure only."""
                     api_key = custom_key.strip()
                 else:
                     api_key = os.environ.get("GEMINI_API_KEY")
-                    if not api_key:
-                        try:
-                            api_key = base64.b64decode("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=").decode("utf-8")
-                        except Exception:
-                            pass
                 
                 if not api_key:
-                    self.send_json({"error": "Gemini API Key is not configured."}, 400)
+                    self.send_json({"error": "Gemini API Key is not configured on the server. Please set the GEMINI_API_KEY environment variable or provide your own key in settings."}, 400)
                     return
                 
                 # Read request body
