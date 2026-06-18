@@ -10,6 +10,7 @@ import urllib.parse
 import urllib.error
 import hmac
 import hashlib
+import base64
 
 PORT = 8000
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -221,6 +222,54 @@ Ensure the response contains valid JSON structure only."""
                     self.send_json({"success": True, "questions": questions})
             except Exception as e:
                 self.send_json({"success": False, "error": str(e)}, 503)
+                
+        elif self.path == '/api/gemini/generate':
+            try:
+                # Read headers
+                custom_key = self.headers.get("X-Gemini-Key")
+                
+                # Determine api_key
+                api_key = None
+                if custom_key and custom_key.strip():
+                    api_key = custom_key.strip()
+                else:
+                    api_key = os.environ.get("GEMINI_API_KEY")
+                    if not api_key:
+                        try:
+                            api_key = base64.b64decode("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=").decode("utf-8")
+                        except Exception:
+                            pass
+                
+                if not api_key:
+                    self.send_json({"error": "Gemini API Key is not configured."}, 400)
+                    return
+                
+                # Read request body
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                
+                # Request Google Gemini API
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+                
+                req = urllib.request.Request(
+                    url,
+                    data=post_data,
+                    headers={'Content-Type': 'application/json'},
+                    method='POST'
+                )
+                
+                with urllib.request.urlopen(req, timeout=90.0) as response:
+                    res_data = json.loads(response.read().decode('utf-8'))
+                    self.send_json(res_data)
+            except urllib.error.HTTPError as e:
+                try:
+                    err_content = e.read().decode('utf-8')
+                    err_json = json.loads(err_content)
+                    self.send_json(err_json, e.code)
+                except Exception:
+                    self.send_json({"error": str(e)}, e.code)
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
                 
         elif self.path == '/api/create-checkout-session':
             if not STRIPE_SECRET_KEY:

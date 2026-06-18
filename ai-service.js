@@ -217,10 +217,9 @@ class AIService {
 
     async getTutorResponse(question, subject = 'general', level = 'intermediate', language = 'English', imageObj = null) {
         const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
-        let geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
-        geminiKey = geminiKey.trim();
+        const geminiKey = (localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "").trim();
         
-        if (provider === "cloud_gemini" && geminiKey) {
+        if (provider === "cloud_gemini") {
             try {
                 const systemPrompt = `You are "Your AI Partner", an empathetic, highly skilled personalized study tutor.
 The student has chosen the language "${language}", learning level "${level}", and academic subject "${subject}".
@@ -259,9 +258,14 @@ Always structure your answers beautifully with markdown, explain core concepts w
                     }
                 };
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+                const headers = { 'Content-Type': 'application/json' };
+                if (geminiKey) {
+                    headers['X-Gemini-Key'] = geminiKey;
+                }
+
+                const res = await fetch(`/api/gemini/generate`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: headers,
                     body: JSON.stringify(payload)
                 });
 
@@ -337,9 +341,9 @@ Always structure your answers beautifully with markdown, explain core concepts w
 
     async getCustomQuestions(subject, examType = 'General') {
         const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
-        const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
+        const geminiKey = (localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "").trim();
         
-        if (provider === "cloud_gemini" && geminiKey) {
+        if (provider === "cloud_gemini") {
             try {
                 const prompt = `Generate exactly 4 multiple-choice questions for a diagnostic test on the subject '${subject}' suitable for a student preparing for the '${examType}' exam.
 The output MUST be a JSON array of exactly 4 objects. Do not wrap in markdown or add explanations outside the JSON structure.
@@ -362,9 +366,14 @@ Ensure the response contains valid JSON structure only.`;
                     }
                 };
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+                const headers = { 'Content-Type': 'application/json' };
+                if (geminiKey) {
+                    headers['X-Gemini-Key'] = geminiKey;
+                }
+
+                const res = await fetch(`/api/gemini/generate`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: headers,
                     body: JSON.stringify(payload)
                 });
 
@@ -827,9 +836,9 @@ Ensure the response contains valid JSON structure only.`;
 
     async getRevisionFlashcards(subject) {
         const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
-        const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
+        const geminiKey = (localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "").trim();
         
-        if (provider === "cloud_gemini" && geminiKey) {
+        if (provider === "cloud_gemini") {
             try {
                 const prompt = `Generate exactly 6 premium study flashcards for quick revision on the subject '${subject}'.
 The output MUST be a JSON array of exactly 6 objects. Do not wrap in markdown or add explanations outside the JSON structure.
@@ -851,9 +860,14 @@ Ensure the response contains valid JSON structure only.`;
                     }
                 };
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+                const headers = { 'Content-Type': 'application/json' };
+                if (geminiKey) {
+                    headers['X-Gemini-Key'] = geminiKey;
+                }
+
+                const res = await fetch(`/api/gemini/generate`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: headers,
                     body: JSON.stringify(payload)
                 });
 

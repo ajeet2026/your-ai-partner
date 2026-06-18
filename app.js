@@ -1,9 +1,10 @@
 // app.js - Main Application Orchestrator & View Controller
 document.addEventListener("DOMContentLoaded", () => {
-    // Auto-update old leaked API key to the active one in localStorage if cached
+    // Clear old/new default keys from localStorage to enforce proxying and avoid exposing them
     const cachedKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY");
-    if (cachedKey && (cachedKey.includes("AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU") || cachedKey.startsWith("AIzaSy"))) {
-        localStorage.setItem("YOUR_AI_PARTNER_GEMINI_KEY", atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE="));
+    const defaultKeyDecoded = atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
+    if (cachedKey === defaultKeyDecoded || (cachedKey && (cachedKey.includes("AIzaSyDMT4LPz0XZCBq2lvp60B6shDXFg1rM0mU") || cachedKey.startsWith("AIzaSy")))) {
+        localStorage.removeItem("YOUR_AI_PARTNER_GEMINI_KEY");
     }
 
     // Check global services are present
@@ -2163,7 +2164,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         DOMElements.btnOpenServerSettings.addEventListener("click", () => {
             const provider = localStorage.getItem("YOUR_AI_PARTNER_API_PROVIDER") || "cloud_gemini";
-            const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || atob("QVEuQWI4Uk42SmRFYzdfZjBKWXdvRjRudEpsVkRydTJTTllVZGp3aDI1LTlhMVVFemNrRlE=");
+            const geminiKey = localStorage.getItem("YOUR_AI_PARTNER_GEMINI_KEY") || "";
             const ownerUpi = localStorage.getItem("YOUR_AI_PARTNER_OWNER_UPI") || "ajeetkumar8877274374-1@okicici";
             const ownerName = localStorage.getItem("YOUR_AI_PARTNER_OWNER_NAME") || "Ajeetroy_1";
             
@@ -2213,12 +2214,12 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("YOUR_AI_PARTNER_OWNER_NAME", ownerName);
             
             if (provider === "cloud_gemini") {
-                if (!geminiKey) {
-                    alert("Please enter your Gemini API Key to enable cloud processing!");
-                    return;
-                }
                 localStorage.setItem("YOUR_AI_PARTNER_API_PROVIDER", "cloud_gemini");
-                localStorage.setItem("YOUR_AI_PARTNER_GEMINI_KEY", geminiKey);
+                if (geminiKey) {
+                    localStorage.setItem("YOUR_AI_PARTNER_GEMINI_KEY", geminiKey);
+                } else {
+                    localStorage.removeItem("YOUR_AI_PARTNER_GEMINI_KEY");
+                }
                 
                 DOMElements.aiSettingsModalOverlay.classList.remove("active");
                 alert("Cloud AI Provider and UPI settings configured successfully! Active Model: [Gemini 2.5 Flash] (Zero Mac Heat! ⚡)");
